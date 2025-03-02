@@ -25,13 +25,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Safely check for localStorage availability
     if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("reflecta-user");
+      const storedUser = localStorage.getItem("reflekta-user");
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser));
         } catch (error) {
           console.error("Failed to parse stored user data:", error);
-          localStorage.removeItem("reflecta-user");
+          localStorage.removeItem("reflekta-user");
         }
       }
     }
@@ -43,12 +43,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (email === "admin" && password === "admin") {
       const user = {
         name: "Dr. Admin Smith",
-        email: "admin@reflecta.com",
+        email: "admin@reflekta.ai",
         role: "admin" as const,
       };
       setUser(user);
       if (typeof window !== "undefined") {
-        localStorage.setItem("reflecta-user", JSON.stringify(user));
+        localStorage.setItem("reflekta-user", JSON.stringify(user));
+      }
+      return true;
+    } else if (email === "therapist" && password === "therapist") {
+      const user = {
+        name: "Dr. Jane Wilson",
+        email: "jane.wilson@reflekta.ai",
+        role: "therapist" as const,
+      };
+      setUser(user);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("reflekta-user", JSON.stringify(user));
+      }
+      return true;
+    } else if (email === "patient" && password === "patient") {
+      const user = {
+        name: "Michael Johnson",
+        email: "michael.johnson@gmail.com",
+        role: "patient" as const,
+      };
+      setUser(user);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("reflekta-user", JSON.stringify(user));
       }
       return true;
     }
@@ -58,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     if (typeof window !== "undefined") {
-      localStorage.removeItem("reflecta-user");
+      localStorage.removeItem("reflekta-user");
     }
   };
 

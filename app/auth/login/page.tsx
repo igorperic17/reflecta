@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
-import { ArrowRight, Shield, Brain, Users, Sparkles } from "lucide-react";
+import { ArrowRight, Shield, Brain, Users, Sparkles, Info } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,7 +28,7 @@ export default function LoginPage() {
       if (success) {
         router.push("/dashboard");
       } else {
-        setError("Invalid credentials. Try admin/admin for demo.");
+        setError("Invalid credentials. Try one of the demo accounts listed below.");
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[url('/wave-pattern.svg')] opacity-10"></div>
         <div className="relative z-10 flex flex-col justify-center px-12 py-12 w-full">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-6">Reflecta</h1>
+            <h1 className="text-4xl font-bold mb-6">reflekta.ai</h1>
             <p className="text-xl text-blue-100 mb-8">AI-Powered Mental Healthcare Platform</p>
           </div>
           
@@ -102,7 +102,7 @@ export default function LoginPage() {
               <span>Welcome Back</span>
             </div>
             <h1 className="text-3xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
-              Sign in to Reflecta
+              Sign in to reflekta.ai
             </h1>
             <p className="mt-2 text-slate-600 dark:text-slate-300">
               Enter your credentials to access your account
@@ -123,7 +123,7 @@ export default function LoginPage() {
                     id="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin" 
+                    placeholder="Enter username" 
                     className="border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                 </div>
@@ -139,9 +139,23 @@ export default function LoginPage() {
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="admin"
+                    placeholder="Enter password"
                     className="border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
+                </div>
+                
+                <div className="p-3 bg-blue-50 text-blue-700 rounded-md dark:bg-blue-900/20 dark:text-blue-300 text-sm">
+                  <div className="flex items-start">
+                    <Info className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium mb-1">Demo Accounts:</p>
+                      <ul className="list-disc list-inside space-y-1 pl-1">
+                        <li><span className="font-medium">Admin:</span> username: admin, password: admin</li>
+                        <li><span className="font-medium">Therapist:</span> username: therapist, password: therapist</li>
+                        <li><span className="font-medium">Patient:</span> username: patient, password: patient</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-4 border-t border-slate-100 dark:border-slate-800 pt-6">

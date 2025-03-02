@@ -16,7 +16,11 @@ import {
   LogOut,
   Brain,
   MessageSquare,
-  Bell
+  Bell,
+  CreditCard,
+  FileText,
+  User,
+  HeartPulse
 } from "lucide-react";
 import { GhostButton, SubtleDestructiveButton } from "@/components/dashboard/DashboardButton";
 
@@ -58,6 +62,93 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   }
 
+  // Define navigation items based on user role
+  const getNavigationItems = () => {
+    const commonItems = [
+      {
+        href: "/dashboard",
+        icon: LayoutDashboard,
+        label: "Dashboard"
+      },
+      {
+        href: "/dashboard/sessions",
+        icon: Calendar,
+        label: "Sessions"
+      },
+      {
+        href: "/dashboard/ai-tools",
+        icon: Brain,
+        label: "AI Tools"
+      }
+    ];
+
+    if (user.role === "admin") {
+      return [
+        ...commonItems,
+        {
+          href: "/dashboard/patients",
+          icon: Users,
+          label: "Patients"
+        },
+        {
+          href: "/dashboard/therapists",
+          icon: HeartPulse,
+          label: "Therapists"
+        },
+        {
+          href: "/dashboard/reports",
+          icon: BarChart,
+          label: "Reports"
+        },
+        {
+          href: "/dashboard/settings",
+          icon: Settings,
+          label: "Settings"
+        }
+      ];
+    } else if (user.role === "therapist") {
+      return [
+        ...commonItems,
+        {
+          href: "/dashboard/patients",
+          icon: Users,
+          label: "My Patients"
+        },
+        {
+          href: "/dashboard/billing",
+          icon: CreditCard,
+          label: "Billing"
+        },
+        {
+          href: "/dashboard/profile",
+          icon: User,
+          label: "Profile"
+        }
+      ];
+    } else { // patient
+      return [
+        ...commonItems,
+        {
+          href: "/dashboard/documents",
+          icon: FileText,
+          label: "Documents"
+        },
+        {
+          href: "/dashboard/billing",
+          icon: CreditCard,
+          label: "Billing"
+        },
+        {
+          href: "/dashboard/profile",
+          icon: User,
+          label: "Profile"
+        }
+      ];
+    }
+  };
+
+  const navigationItems = getNavigationItems();
+
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Sidebar */}
@@ -65,42 +156,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold">
-              R
+              r
             </div>
-            <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">Reflecta</span>
+            <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">reflekta.ai</span>
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1">
-          <Link href="/dashboard">
-            <GhostButton icon={LayoutDashboard} className="w-full justify-start">
-              Dashboard
-            </GhostButton>
-          </Link>
-          <Link href="/dashboard/patients">
-            <GhostButton icon={Users} className="w-full justify-start">
-              Patients
-            </GhostButton>
-          </Link>
-          <Link href="/dashboard/sessions">
-            <GhostButton icon={Calendar} className="w-full justify-start">
-              Sessions
-            </GhostButton>
-          </Link>
-          <Link href="/dashboard/ai-tools">
-            <GhostButton icon={Brain} className="w-full justify-start">
-              AI Tools
-            </GhostButton>
-          </Link>
-          <Link href="/dashboard/reports">
-            <GhostButton icon={BarChart} className="w-full justify-start">
-              Reports
-            </GhostButton>
-          </Link>
-          <Link href="/dashboard/settings">
-            <GhostButton icon={Settings} className="w-full justify-start">
-              Settings
-            </GhostButton>
-          </Link>
+          {navigationItems.map((item) => (
+            <Link href={item.href} key={item.href}>
+              <GhostButton icon={item.icon} className="w-full justify-start">
+                {item.label}
+              </GhostButton>
+            </Link>
+          ))}
           <SubtleDestructiveButton 
             icon={LogOut}
             className="w-full justify-start" 
@@ -129,9 +197,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 w-full">
         <Link href="/" className="flex items-center space-x-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold">
-            R
+            r
           </div>
-          <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">Reflecta</span>
+          <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">reflekta.ai</span>
         </Link>
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon" className="text-slate-700 dark:text-slate-300">
