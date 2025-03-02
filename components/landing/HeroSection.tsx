@@ -29,10 +29,17 @@ export function HeroSection({ mounted }: HeroSectionProps) {
     { id: 2, text: "I'm not sure... I've been feeling overwhelmed lately and can't really pinpoint why.", sender: 'user' },
     { id: 3, text: "That's completely understandable. Sometimes our emotions can feel complex and difficult to identify. Would you like to explore what might be contributing to that feeling?", sender: 'assistant' },
     { id: 4, text: "Yes, I think that would help. I've been having trouble sleeping and my thoughts keep racing.", sender: 'user' },
-    { id: 5, text: "I hear you. Sleep difficulties and racing thoughts can definitely contribute to feeling overwhelmed. Let's try a brief grounding exercise to help you connect with your present experience. Would that be okay?", sender: 'assistant' },
+    { id: 5, text: "I hear you. Sleep difficulties and racing thoughts can definitely contribute to feeling overwhelmed. Let's try a brief grounding exercise to help you connect with your present experience.", sender: 'assistant' },
     { id: 6, text: "I'd like to try that. What should I do?", sender: 'user' },
     { id: 7, text: "Great. Let's start with a simple breathing exercise. Take a slow, deep breath in for 4 counts, hold for 2, and exhale for 6. We'll do this together a few times to help calm your nervous system.", sender: 'assistant' },
   ];
+  
+  // Function to scroll to the bottom of the chat container
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
   
   useEffect(() => {
     if (!mounted) return;
@@ -44,33 +51,25 @@ export function HeroSection({ mounted }: HeroSectionProps) {
         
         // Show typing indicator for assistant messages
         if (initialMessages[currentMessageIndex].sender === 'assistant') {
-          // Longer typing time for assistant based on message length
-          const typingTime = Math.min(1500 + initialMessages[currentMessageIndex].text.length * 10, 3500);
-          
+          // Consistent typing time for assistant (2 seconds)
           setTimeout(() => {
             setIsTyping(false);
             setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
             setCurrentMessageIndex(prev => prev + 1);
             
-            // Scroll to bottom
-            if (chatContainerRef.current) {
-              chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-            }
-          }, typingTime);
+            // Scroll to bottom after message is added
+            setTimeout(scrollToBottom, 50);
+          }, 2000);
         } else {
-          // User messages appear more quickly
-          const typingTime = Math.min(800 + initialMessages[currentMessageIndex].text.length * 5, 2000);
-          
+          // Consistent typing time for user (1 second)
           setTimeout(() => {
             setIsTyping(false);
             setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
             setCurrentMessageIndex(prev => prev + 1);
             
-            // Scroll to bottom
-            if (chatContainerRef.current) {
-              chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-            }
-          }, typingTime);
+            // Scroll to bottom after message is added
+            setTimeout(scrollToBottom, 50);
+          }, 1000);
         }
       }
     };
@@ -79,11 +78,15 @@ export function HeroSection({ mounted }: HeroSectionProps) {
     if (currentMessageIndex === 0) {
       setTimeout(showNextMessage, 1000);
     } else if (currentMessageIndex < initialMessages.length) {
-      // Add delay between messages
-      const delay = initialMessages[currentMessageIndex - 1].sender === 'assistant' ? 1200 : 1000;
-      setTimeout(showNextMessage, delay);
+      // Consistent delay between messages (1.5 seconds)
+      setTimeout(showNextMessage, 1500);
     }
   }, [mounted, currentMessageIndex, initialMessages]);
+  
+  // Ensure scroll to bottom when chat messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages]);
 
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
@@ -146,7 +149,7 @@ export function HeroSection({ mounted }: HeroSectionProps) {
                   </div>
                   <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Online</div>
                 </div>
-                <div ref={chatContainerRef} className="space-y-4 h-[220px] overflow-y-auto pr-2">
+                <div ref={chatContainerRef} className="space-y-4 h-[220px] overflow-y-auto pr-2 scroll-smooth">
                   {chatMessages.map((message) => (
                     <div 
                       key={message.id}
