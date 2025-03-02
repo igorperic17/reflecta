@@ -47,6 +47,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.16",
+    "critters": "^0.0.23",
     "postcss": "^8.4.32",
     "typescript": "^5"
   }
