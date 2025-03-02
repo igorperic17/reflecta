@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Bell
 } from "lucide-react";
+import { GhostButton, DestructiveButton } from "@/components/dashboard/DashboardButton";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -71,49 +72,42 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
         <nav className="flex-1 p-4 space-y-1">
           <Link href="/dashboard">
-            <Button variant="ghost" className="w-full justify-start text-slate-700 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/50">
-              <LayoutDashboard className="mr-2 h-5 w-5" />
+            <GhostButton icon={LayoutDashboard} className="w-full justify-start">
               Dashboard
-            </Button>
+            </GhostButton>
           </Link>
           <Link href="/dashboard/patients">
-            <Button variant="ghost" className="w-full justify-start text-slate-700 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/50">
-              <Users className="mr-2 h-5 w-5" />
+            <GhostButton icon={Users} className="w-full justify-start">
               Patients
-            </Button>
+            </GhostButton>
           </Link>
           <Link href="/dashboard/sessions">
-            <Button variant="ghost" className="w-full justify-start text-slate-700 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/50">
-              <Calendar className="mr-2 h-5 w-5" />
+            <GhostButton icon={Calendar} className="w-full justify-start">
               Sessions
-            </Button>
+            </GhostButton>
           </Link>
           <Link href="/dashboard/ai-tools">
-            <Button variant="ghost" className="w-full justify-start text-slate-700 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/50">
-              <Brain className="mr-2 h-5 w-5" />
+            <GhostButton icon={Brain} className="w-full justify-start">
               AI Tools
-            </Button>
+            </GhostButton>
           </Link>
           <Link href="/dashboard/reports">
-            <Button variant="ghost" className="w-full justify-start text-slate-700 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/50">
-              <BarChart className="mr-2 h-5 w-5" />
+            <GhostButton icon={BarChart} className="w-full justify-start">
               Reports
-            </Button>
+            </GhostButton>
           </Link>
           <Link href="/dashboard/settings">
-            <Button variant="ghost" className="w-full justify-start text-slate-700 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/50">
-              <Settings className="mr-2 h-5 w-5" />
+            <GhostButton icon={Settings} className="w-full justify-start">
               Settings
-            </Button>
+            </GhostButton>
           </Link>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20" 
+          <DestructiveButton 
+            icon={LogOut}
+            className="w-full justify-start" 
             onClick={handleLogout}
           >
-            <LogOut className="mr-2 h-5 w-5" />
             Logout
-          </Button>
+          </DestructiveButton>
         </nav>
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
           <div className="flex items-center space-x-3">

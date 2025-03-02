@@ -15,8 +15,10 @@ import {
   ArrowUpRight,
   LineChart,
   FileText,
-  Clock
+  Clock,
+  Eye
 } from "lucide-react";
+import { PrimaryButton, OutlineButton } from "@/components/dashboard/DashboardButton";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -36,10 +38,9 @@ export default function DashboardPage() {
             Here's an overview of your mental healthcare practice
           </p>
         </div>
-        <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0">
-          <UserPlus className="mr-2 h-4 w-4" />
+        <PrimaryButton icon={UserPlus} size="default">
           New Patient
-        </Button>
+        </PrimaryButton>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -138,9 +139,9 @@ export default function DashboardPage() {
                       Today, 10:30 AM - 11:30 AM
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300">
+                  <OutlineButton size="sm" icon={FileText}>
                     View Notes
-                  </Button>
+                  </OutlineButton>
                 </div>
                 <div className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200">
                   <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
@@ -153,9 +154,9 @@ export default function DashboardPage() {
                       Yesterday, 8:45 PM
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300">
+                  <OutlineButton size="sm" icon={Eye}>
                     Review
-                  </Button>
+                  </OutlineButton>
                 </div>
                 <div className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200">
                   <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
@@ -168,9 +169,9 @@ export default function DashboardPage() {
                       Yesterday, 3:20 PM
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300">
+                  <OutlineButton size="sm" icon={Users}>
                     View Profile
-                  </Button>
+                  </OutlineButton>
                 </div>
                 <div className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200">
                   <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
@@ -183,9 +184,9 @@ export default function DashboardPage() {
                       Yesterday, 1:00 PM - 2:00 PM
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300">
+                  <OutlineButton size="sm" icon={FileText}>
                     View Notes
-                  </Button>
+                  </OutlineButton>
                 </div>
               </div>
             </CardContent>
@@ -231,9 +232,9 @@ export default function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300">
+                  <OutlineButton size="sm" icon={ArrowUpRight}>
                     Download
-                  </Button>
+                  </OutlineButton>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200">
                   <div className="flex items-center gap-3">
@@ -247,9 +248,9 @@ export default function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300">
+                  <OutlineButton size="sm" icon={ArrowUpRight}>
                     Download
-                  </Button>
+                  </OutlineButton>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200">
                   <div className="flex items-center gap-3">
@@ -263,9 +264,9 @@ export default function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300">
+                  <OutlineButton size="sm" icon={ArrowUpRight}>
                     Download
-                  </Button>
+                  </OutlineButton>
                 </div>
               </div>
             </CardContent>

@@ -4,6 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  UserPlus, 
+  Search, 
+  Eye, 
+  MessageSquare,
+  Activity
+} from "lucide-react";
+import { PrimaryButton, OutlineButton } from "@/components/dashboard/DashboardButton";
 
 export default function PatientsPage() {
   // Sample patient data
@@ -59,72 +67,83 @@ export default function PatientsPage() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Patients</h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
+          <div className="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full text-blue-600 dark:text-blue-400 text-sm font-medium mb-2">
+            <Activity className="w-4 h-4" />
+            <span>Patient Management</span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
+            Patients
+          </h1>
+          <p className="text-slate-600 dark:text-slate-300 mt-1">
             Manage your patients and their therapy progress
           </p>
         </div>
-        <Button>Add New Patient</Button>
+        <PrimaryButton icon={UserPlus}>
+          Add New Patient
+        </PrimaryButton>
       </div>
 
-      <Card>
+      <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm">
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <div>
-              <CardTitle>All Patients</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-slate-900 dark:text-white">All Patients</CardTitle>
+              <CardDescription className="text-slate-500 dark:text-slate-400">
                 A list of all your patients and their status
               </CardDescription>
             </div>
-            <div className="w-full md:w-auto">
-              <Input placeholder="Search patients..." className="max-w-sm" />
+            <div className="w-full md:w-auto relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 dark:text-slate-400" />
+              <Input placeholder="Search patients..." className="max-w-sm pl-9 border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400" />
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Patient</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Session</TableHead>
-                <TableHead>AI Interactions</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Actions</TableHead>
+              <TableRow className="border-slate-200 dark:border-slate-700">
+                <TableHead className="text-slate-700 dark:text-slate-300">Patient</TableHead>
+                <TableHead className="text-slate-700 dark:text-slate-300">Status</TableHead>
+                <TableHead className="text-slate-700 dark:text-slate-300">Last Session</TableHead>
+                <TableHead className="text-slate-700 dark:text-slate-300">AI Interactions</TableHead>
+                <TableHead className="text-slate-700 dark:text-slate-300">Progress</TableHead>
+                <TableHead className="text-slate-700 dark:text-slate-300">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {patients.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell>
+                <TableRow key={patient.id} className="border-slate-200 dark:border-slate-700">
+                  <TableCell className="text-slate-900 dark:text-white">
                     <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback>{patient.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
+                      <Avatar className="border-2 border-blue-200 dark:border-blue-800">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
+                          {patient.name.split(" ").map(n => n[0]).join("")}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{patient.name}</p>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">{patient.email}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{patient.email}</p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       patient.status === "Active" 
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
-                        : "bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
+                        : "bg-slate-100 text-slate-800 dark:bg-slate-700/50 dark:text-slate-300"
                     }`}>
                       {patient.status}
                     </div>
                   </TableCell>
-                  <TableCell>{patient.lastSession}</TableCell>
-                  <TableCell>{patient.aiInteractions}</TableCell>
+                  <TableCell className="text-slate-700 dark:text-slate-300">{patient.lastSession}</TableCell>
+                  <TableCell className="text-slate-700 dark:text-slate-300">{patient.aiInteractions}</TableCell>
                   <TableCell>
                     <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       patient.progress === "Improving" 
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100" 
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" 
                         : patient.progress === "Stable"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
                     }`}>
                       {patient.progress}
                     </div>
@@ -132,10 +151,14 @@ export default function PatientsPage() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Link href={`/dashboard/patients/${patient.id}`}>
-                        <Button variant="outline" size="sm">View</Button>
+                        <OutlineButton size="sm" icon={Eye}>
+                          View
+                        </OutlineButton>
                       </Link>
                       <Link href={`/dashboard/patients/${patient.id}/sessions/new`}>
-                        <Button size="sm">New Session</Button>
+                        <PrimaryButton size="sm" icon={MessageSquare}>
+                          New Session
+                        </PrimaryButton>
                       </Link>
                     </div>
                   </TableCell>
