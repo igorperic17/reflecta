@@ -1,0 +1,108 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background elements -->
+  <rect width="800" height="600" fill="#F8FAFC" />
+  <circle cx="400" cy="300" r="250" fill="#EEF2FF" />
+  
+  <!-- Neural network visualization -->
+  <g id="neural-network">
+    <!-- Nodes -->
+    <circle cx="250" cy="150" r="15" fill="#818CF8" />
+    <circle cx="250" cy="250" r="15" fill="#818CF8" />
+    <circle cx="250" cy="350" r="15" fill="#818CF8" />
+    <circle cx="250" cy="450" r="15" fill="#818CF8" />
+    
+    <circle cx="400" cy="100" r="15" fill="#A78BFA" />
+    <circle cx="400" cy="200" r="15" fill="#A78BFA" />
+    <circle cx="400" cy="300" r="15" fill="#A78BFA" />
+    <circle cx="400" cy="400" r="15" fill="#A78BFA" />
+    <circle cx="400" cy="500" r="15" fill="#A78BFA" />
+    
+    <circle cx="550" cy="150" r="15" fill="#C084FC" />
+    <circle cx="550" cy="250" r="15" fill="#C084FC" />
+    <circle cx="550" cy="350" r="15" fill="#C084FC" />
+    <circle cx="550" cy="450" r="15" fill="#C084FC" />
+    
+    <!-- Connections -->
+    <g stroke="#CBD5E1" stroke-width="2">
+      <!-- Layer 1 to Layer 2 -->
+      <line x1="250" y1="150" x2="400" y2="100" />
+      <line x1="250" y1="150" x2="400" y2="200" />
+      <line x1="250" y1="150" x2="400" y2="300" />
+      <line x1="250" y1="150" x2="400" y2="400" />
+      
+      <line x1="250" y1="250" x2="400" y2="100" />
+      <line x1="250" y1="250" x2="400" y2="200" />
+      <line x1="250" y1="250" x2="400" y2="300" />
+      <line x1="250" y1="250" x2="400" y2="400" />
+      <line x1="250" y1="250" x2="400" y2="500" />
+      
+      <line x1="250" y1="350" x2="400" y2="200" />
+      <line x1="250" y1="350" x2="400" y2="300" />
+      <line x1="250" y1="350" x2="400" y2="400" />
+      <line x1="250" y1="350" x2="400" y2="500" />
+      
+      <line x1="250" y1="450" x2="400" y2="300" />
+      <line x1="250" y1="450" x2="400" y2="400" />
+      <line x1="250" y1="450" x2="400" y2="500" />
+      
+      <!-- Layer 2 to Layer 3 -->
+      <line x1="400" y1="100" x2="550" y2="150" />
+      <line x1="400" y1="100" x2="550" y2="250" />
+      
+      <line x1="400" y1="200" x2="550" y2="150" />
+      <line x1="400" y1="200" x2="550" y2="250" />
+      <line x1="400" y1="200" x2="550" y2="350" />
+      
+      <line x1="400" y1="300" x2="550" y2="150" />
+      <line x1="400" y1="300" x2="550" y2="250" />
+      <line x1="400" y1="300" x2="550" y2="350" />
+      <line x1="400" y1="300" x2="550" y2="450" />
+      
+      <line x1="400" y1="400" x2="550" y2="250" />
+      <line x1="400" y1="400" x2="550" y2="350" />
+      <line x1="400" y1="400" x2="550" y2="450" />
+      
+      <line x1="400" y1="500" x2="550" y2="350" />
+      <line x1="400" y1="500" x2="550" y2="450" />
+    </g>
+  </g>
+  
+  <!-- Data flow animation -->
+  <g id="data-flow">
+    <circle cx="250" cy="150" r="5" fill="#3B82F6">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" begin="0s" />
+      <animate attributeName="cx" values="250;400;550" dur="3s" repeatCount="indefinite" begin="0s" />
+      <animate attributeName="cy" values="150;200;250" dur="3s" repeatCount="indefinite" begin="0s" />
+    </circle>
+    
+    <circle cx="250" cy="350" r="5" fill="#3B82F6">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" begin="1s" />
+      <animate attributeName="cx" values="250;400;550" dur="3s" repeatCount="indefinite" begin="1s" />
+      <animate attributeName="cy" values="350;300;350" dur="3s" repeatCount="indefinite" begin="1s" />
+    </circle>
+    
+    <circle cx="250" cy="250" r="5" fill="#3B82F6">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" begin="2s" />
+      <animate attributeName="cx" values="250;400;550" dur="3s" repeatCount="indefinite" begin="2s" />
+      <animate attributeName="cy" values="250;400;450" dur="3s" repeatCount="indefinite" begin="2s" />
+    </circle>
+  </g>
+  
+  <!-- Brain icon -->
+  <g transform="translate(650, 100) scale(0.8)">
+    <circle cx="50" cy="50" r="40" fill="#EDE9FE" />
+    <path d="M50 20C36 20 25 31 25 45C25 59 36 70 50 70C64 70 75 59 75 45C75 31 64 20 50 20ZM60 55C60 56.1 59.1 57 58 57H42C40.9 57 40 56.1 40 55V45C40 43.9 40.9 43 42 43H58C59.1 43 60 43.9 60 45V55ZM58 40H42C40.9 40 40 39.1 40 38V35C40 33.9 40.9 33 42 33H58C59.1 33 60 33.9 60 35V38C60 39.1 59.1 40 58 40Z" fill="#8B5CF6" />
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="30" fill="#DBEAFE" opacity="0.7" />
+  <circle cx="700" cy="500" r="40" fill="#DBEAFE" opacity="0.7" />
+  <circle cx="200" cy="500" r="25" fill="#DBEAFE" opacity="0.7" />
+  <circle cx="600" cy="200" r="35" fill="#DBEAFE" opacity="0.7" />
+  
+  <!-- Pulse animation around the center -->
+  <circle cx="400" cy="300" r="100" fill="none" stroke="#818CF8" stroke-width="2">
+    <animate attributeName="r" values="100;150;100" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.7;0;0.7" dur="4s" repeatCount="indefinite" />
+  </circle>
+</svg> 

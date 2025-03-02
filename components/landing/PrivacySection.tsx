@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, Lock, FileCheck } from "lucide-react";
+import { Shield, FileCheck, Lock } from "lucide-react";
 
 export function PrivacySection() {
   return (

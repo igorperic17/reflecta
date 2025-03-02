@@ -1,8 +1,9 @@
-## Project info
+---
+description: Project descriptions
+globs: 
+---
 
-- Project name: Reflecta
-- Helps clinical professionals and psychotherapist manage their patients using AI.
-- The project is a web app that allows clinicians to track their patients' progress and provide feedback.
-- This is not a mindfulness app. It is a tool that helps clinicians manage their psychotherapy patients using AI.
+# Project info
 
-- The year is 2025
+- Project name: Reflacta
+- It is a web app helping psychotherapist manage their patients. It uses AI to increase their bandwith and revenue and enable closer personalized care for patients.

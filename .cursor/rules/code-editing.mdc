@@ -1,3 +1,7 @@
+---
+description: Code editing and development rules
+globs: 
+---
 ## Code editing
 
 - Run the app always in your terminal session to observe the output instead of running it in the background terminal.
