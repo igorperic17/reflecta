@@ -191,11 +191,13 @@ export default function PatientsPage() {
                           View
                         </OutlineButton>
                       </Link>
-                      <Link href={`/dashboard/patients/${patient.id}/sessions/new`}>
-                        <PrimaryButton size="sm" icon={MessageSquare}>
-                          New Session
-                        </PrimaryButton>
-                      </Link>
+                      {user?.role === "therapist" && (
+                        <Link href={`/dashboard/patients/${patient.id}/sessions/new`}>
+                          <PrimaryButton size="sm" icon={MessageSquare}>
+                            New Session
+                          </PrimaryButton>
+                        </Link>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

@@ -61,6 +61,25 @@ export default function SessionDetailPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Redirect administrators to sessions list page
+  useEffect(() => {
+    if (user?.role === "admin") {
+      router.push("/dashboard/sessions");
+    }
+  }, [user, router]);
+  
+  // If user is an administrator, show a loading state while redirecting
+  if (user?.role === "admin") {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600 dark:text-blue-400" />
+          <p className="text-slate-600 dark:text-slate-300">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Fetch session data
   useEffect(() => {
     // In a real app, you would fetch this from an API

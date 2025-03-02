@@ -313,7 +313,7 @@ export default function SessionsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 dark:text-slate-400" />
             <Input placeholder="Search sessions..." className="pl-9 border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400" />
           </div>
-          {user?.role !== "patient" && (
+          {user?.role === "therapist" && (
             <PrimaryButton 
               icon={Plus} 
               onClick={() => setShowNewSessionDialog(true)}
