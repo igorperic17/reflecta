@@ -1,3 +1,7 @@
+---
+description: 
+globs: 
+---
 # Tech stack
 
 - The project is built with React, Next.js, and Tailwind CSS.
@@ -9,7 +13,9 @@
 
 - Uses bun instead of npm or yarn
 - Uses Vercel for deployment
-- Uses Supabase for database
+- Uses PostgreSQL for database (Supabase on Vercel)
 - Uses Clerk for authentication
 - Uses Stripe for payments
-- Uses Lucid for database modeling
+- Uses TypeORM for database modeling
+
+- The app is located in the /app folder, make sure to place all of the React components there.
