@@ -17,13 +17,15 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-950 dark:to-slate-900">
-      <HeroSection mounted={mounted} />
-      <FeaturesSection />
-      <JourneySection />
-      <TechnologySection />
-      <PrivacySection />
-      <CTASection />
+    <div className="flex flex-col min-h-screen bg-white dark:bg-slate-900">
+      <main className="flex-grow">
+        <HeroSection mounted={mounted} />
+        <FeaturesSection />
+        <JourneySection />
+        <TechnologySection />
+        <PrivacySection />
+        <CTASection />
+      </main>
       <Footer />
     </div>
   );

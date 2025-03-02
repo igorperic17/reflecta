@@ -1,20 +1,21 @@
 "use client";
 
-import { Brain, Network, Database, UserCog } from "lucide-react";
+import { Brain, Network, Database, UserCog, Cpu } from "lucide-react";
 import Image from "next/image";
 
 export function TechnologySection() {
   return (
-    <section className="py-20 bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-900 dark:to-indigo-950 relative overflow-hidden">
+    <section className="py-20 bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
       {/* Background pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(99,102,241,0.1),transparent_25%)] dark:bg-[radial-gradient(circle_at_70%_70%,rgba(99,102,241,0.05),transparent_25%)]"></div>
       
       <div className="container px-4 md:px-6 relative z-10 mx-auto max-w-7xl">
         <div className="flex flex-col items-center space-y-4 text-center mb-12">
-          <div className="inline-block rounded-lg bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1 text-sm text-indigo-600 dark:text-indigo-400 mb-2">
-            Advanced Technology
+          <div className="inline-flex items-center space-x-2 bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1 rounded-full text-indigo-600 dark:text-indigo-400 text-sm font-medium mb-2">
+            <Cpu className="w-4 h-4" />
+            <span>Advanced Technology</span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
             Cutting-Edge AI for Mental Healthcare
           </h2>
           <p className="mx-auto max-w-[800px] text-slate-600 md:text-xl dark:text-slate-300">
@@ -23,8 +24,8 @@ export function TechnologySection() {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mt-12">
-          <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/10 dark:to-purple-500/10 z-10"></div>
+          <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/5 dark:to-purple-500/5 z-10"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-full h-full relative">
                 <Image 
@@ -38,8 +39,8 @@ export function TechnologySection() {
             </div>
           </div>
           
-          <div className="space-y-8">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100 dark:border-slate-700 group">
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700 group">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <Brain className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
@@ -53,7 +54,7 @@ export function TechnologySection() {
               </div>
             </div>
             
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100 dark:border-slate-700 group">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700 group">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <Database className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -67,7 +68,7 @@ export function TechnologySection() {
               </div>
             </div>
             
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100 dark:border-slate-700 group">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700 group">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <UserCog className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -81,10 +82,10 @@ export function TechnologySection() {
               </div>
             </div>
             
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100 dark:border-slate-700 group">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700 group">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                  <Network className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+                <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <Network className="w-6 h-6 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Continuous Learning</h3>
@@ -97,7 +98,7 @@ export function TechnologySection() {
           </div>
         </div>
         
-        <div className="mt-16 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 rounded-2xl p-8 shadow-xl text-white">
+        <div className="mt-16 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-500 dark:via-indigo-500 dark:to-purple-500 rounded-2xl p-8 shadow-xl text-white">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="md:max-w-[60%]">
               <h3 className="text-2xl font-bold mb-2">Technology That Empowers</h3>
