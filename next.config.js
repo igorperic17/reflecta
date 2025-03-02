@@ -5,7 +5,7 @@ const nextConfig = {
     domains: ['ui-avatars.com'], // Allow images from UI Avatars service
   },
   experimental: {
-    optimizeCss: true, // Enable CSS optimization
+    optimizeCss: false, // Disable CSS optimization to fix build error
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
 }
