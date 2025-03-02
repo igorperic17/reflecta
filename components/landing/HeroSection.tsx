@@ -13,7 +13,7 @@ interface HeroSectionProps {
 }
 
 interface ChatMessage {
-  id: number;
+  id: string;
   text: string;
   sender: 'assistant' | 'user';
 }
@@ -24,15 +24,20 @@ export function HeroSection({ mounted }: HeroSectionProps) {
   const [isTyping, setIsTyping] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
-  const initialMessages: ChatMessage[] = [
-    { id: 1, text: "Hello there. How are you feeling today?", sender: 'assistant' },
-    { id: 2, text: "I'm not sure... I've been feeling overwhelmed lately and can't really pinpoint why.", sender: 'user' },
-    { id: 3, text: "That's completely understandable. Sometimes our emotions can feel complex and difficult to identify. Would you like to explore what might be contributing to that feeling?", sender: 'assistant' },
-    { id: 4, text: "Yes, I think that would help. I've been having trouble sleeping and my thoughts keep racing.", sender: 'user' },
-    { id: 5, text: "I hear you. Sleep difficulties and racing thoughts can definitely contribute to feeling overwhelmed. Let's try a brief grounding exercise to help you connect with your present experience.", sender: 'assistant' },
-    { id: 6, text: "I'd like to try that. What should I do?", sender: 'user' },
-    { id: 7, text: "Great. Let's start with a simple breathing exercise. Take a slow, deep breath in for 4 counts, hold for 2, and exhale for 6. We'll do this together a few times to help calm your nervous system.", sender: 'assistant' },
+  const initialMessages = [
+    { text: "Hello there. How are you feeling today?", sender: 'assistant' as const },
+    { text: "I'm not sure... I've been feeling overwhelmed lately and can't really pinpoint why.", sender: 'user' as const },
+    { text: "That's completely understandable. Sometimes our emotions can feel complex and difficult to identify. Would you like to explore what might be contributing to that feeling?", sender: 'assistant' as const },
+    { text: "Yes, I think that would help. I've been having trouble sleeping and my thoughts keep racing.", sender: 'user' as const },
+    { text: "I hear you. Sleep difficulties and racing thoughts can definitely contribute to feeling overwhelmed. Let's try a brief grounding exercise to help you connect with your present experience.", sender: 'assistant' as const },
+    { text: "I'd like to try that. What should I do?", sender: 'user' as const },
+    { text: "Great. Let's start with a simple breathing exercise. Take a slow, deep breath in for 4 counts, hold for 2, and exhale for 6. We'll do this together a few times to help calm your nervous system.", sender: 'assistant' as const },
   ];
+  
+  // Function to generate a unique ID
+  const generateUniqueId = () => {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+  };
   
   // Function to scroll to the bottom of the chat container
   const scrollToBottom = () => {
@@ -54,7 +59,14 @@ export function HeroSection({ mounted }: HeroSectionProps) {
           // Consistent typing time for assistant (2 seconds)
           setTimeout(() => {
             setIsTyping(false);
-            setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
+            setChatMessages(prev => [
+              ...prev, 
+              {
+                id: generateUniqueId(),
+                text: initialMessages[currentMessageIndex].text,
+                sender: initialMessages[currentMessageIndex].sender
+              }
+            ]);
             setCurrentMessageIndex(prev => prev + 1);
             
             // Scroll to bottom after message is added
@@ -64,7 +76,14 @@ export function HeroSection({ mounted }: HeroSectionProps) {
           // Consistent typing time for user (1 second)
           setTimeout(() => {
             setIsTyping(false);
-            setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
+            setChatMessages(prev => [
+              ...prev, 
+              {
+                id: generateUniqueId(),
+                text: initialMessages[currentMessageIndex].text,
+                sender: initialMessages[currentMessageIndex].sender
+              }
+            ]);
             setCurrentMessageIndex(prev => prev + 1);
             
             // Scroll to bottom after message is added
