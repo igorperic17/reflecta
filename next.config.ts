@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
   reactStrictMode: true,
+  images: {
+    domains: ['ui-avatars.com'], // Allow images from UI Avatars service
+  },
+  experimental: {
+    optimizeCss: false, // Disable CSS optimization to fix build error
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
+  },
 };
 
 export default nextConfig;
