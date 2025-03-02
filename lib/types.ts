@@ -9,6 +9,7 @@ export interface Session {
   type: string;
   notes: string;
   treatmentMethod: string;
+  isAISession: boolean; // Whether this is an AI-assisted session or in-person
 }
 
 // User roles

@@ -74,7 +74,8 @@ export default function SessionDetailPage() {
         status: "Upcoming",
         type: "Initial Assessment",
         notes: "",
-        treatmentMethod: "cbt"
+        treatmentMethod: "cbt",
+        isAISession: true
       },
       {
         id: "2",
@@ -85,7 +86,8 @@ export default function SessionDetailPage() {
         status: "Upcoming",
         type: "Follow-up",
         notes: "",
-        treatmentMethod: "psychodynamic"
+        treatmentMethod: "psychodynamic",
+        isAISession: false
       },
       {
         id: "3",
@@ -96,7 +98,8 @@ export default function SessionDetailPage() {
         status: "Upcoming",
         type: "Follow-up",
         notes: "",
-        treatmentMethod: "humanistic"
+        treatmentMethod: "humanistic",
+        isAISession: true
       },
       {
         id: "4",
@@ -107,12 +110,24 @@ export default function SessionDetailPage() {
         status: "Completed",
         type: "Follow-up",
         notes: "Patient reported improved sleep patterns. Continuing with current treatment plan.",
-        treatmentMethod: "cbt"
+        treatmentMethod: "cbt",
+        isAISession: false
+      },
+      {
+        id: "5",
+        patientId: "p5",
+        patientName: "Morgan Lee",
+        date: "2 days ago",
+        time: "1:45 PM",
+        status: "Completed",
+        type: "Follow-up",
+        notes: "Discussed coping strategies for anxiety. Patient is making good progress.",
+        treatmentMethod: "cbt",
+        isAISession: true
       }
     ];
 
-    const sessionId = params?.id as string;
-    const foundSession = mockSessions.find(s => s.id === sessionId);
+    const foundSession = mockSessions.find(s => s.id === params.id);
     
     if (foundSession) {
       setSession(foundSession);
@@ -163,28 +178,28 @@ export default function SessionDetailPage() {
       }
     };
     
-    if (session) {
+    // Only initialize LLM if this is an AI session or if the user is a patient
+    if (session && (session.isAISession || user?.role === 'patient')) {
       initLLM();
     }
     
     return () => {
-      // Clean up LLM when component unmounts
+      // Cleanup
     };
   }, [session]);
 
-  // Generate unique ID for messages
+  // Generate a unique ID for chat messages
   const generateUniqueId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
   };
 
-  // Scroll to bottom of chat
+  // Scroll chat to bottom when messages change
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
-  // Effect to scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
@@ -429,27 +444,21 @@ export default function SessionDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-6 space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <OutlineButton icon={ArrowLeft} onClick={goBack}>
-            Back to Sessions
-          </OutlineButton>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Session with {session.patientName}
-          </h1>
+          <OutlineButton icon={ArrowLeft} onClick={goBack} />
+          <h1 className="text-2xl font-bold">Session Details</h1>
         </div>
         
         <Badge 
-          className={
-            session.status === "Completed" 
-              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-              : session.status === "Cancelled" 
-                ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-          }
+          className={`
+            ${session?.status === "Upcoming" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" : ""}
+            ${session?.status === "Completed" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : ""}
+            ${session?.status === "Cancelled" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" : ""}
+          `}
         >
-          {session.status}
+          {session?.status}
         </Badge>
       </div>
       
@@ -459,18 +468,25 @@ export default function SessionDetailPage() {
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12 border-2 border-blue-200 dark:border-blue-800">
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
-                  {session.patientName.split(" ").map((n: string) => n[0]).join("")}
+                  {session?.patientName.split(" ").map((n: string) => n[0]).join("")}
                 </AvatarFallback>
               </Avatar>
               
               <div>
-                <CardTitle className="text-xl">{session.patientName}</CardTitle>
+                <CardTitle className="text-xl">{session?.patientName}</CardTitle>
                 <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                  <span>{session.date}, {session.time}</span>
+                  <span>{session?.date}, {session?.time}</span>
                   <span>•</span>
-                  <span>{session.type}</span>
+                  <span>{session?.type}</span>
                   <Badge className="bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300">
-                    {getTherapyTypeName(session.treatmentMethod)}
+                    {getTherapyTypeName(session?.treatmentMethod || "")}
+                  </Badge>
+                  <Badge className={`${
+                    session?.isAISession 
+                      ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" 
+                      : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  }`}>
+                    {session?.isAISession ? "AI Session" : "In-Person"}
                   </Badge>
                 </div>
               </div>
@@ -501,159 +517,190 @@ export default function SessionDetailPage() {
                 {isLoadingTranscription ? (
                   <div className="flex items-center gap-1">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    <span>Loading Model...</span>
+                    <span>Preparing...</span>
                   </div>
                 ) : transcriptionReady ? (
                   <div className="flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" />
-                    <span>Transcription Ready</span>
+                    <span>Ready</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1">
-                    <span>Transcription Not Loaded</span>
-                  </div>
-                )}
-              </Badge>
-              
-              <Badge 
-                className={`${
-                  isLLMLoading 
-                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" 
-                    : isLLMLoaded 
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-slate-100 text-slate-800 dark:bg-slate-700/50 dark:text-slate-300"
-                }`}
-              >
-                {isLLMLoading ? (
-                  <div className="flex items-center gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span>Loading AI: {llmLoadingProgress}%</span>
-                  </div>
-                ) : isLLMLoaded ? (
-                  <div className="flex items-center gap-1">
-                    <Brain className="h-3 w-3" />
-                    <span>AI Assistant Ready</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    <span>AI Not Loaded</span>
-                  </div>
+                  <span>Not Ready</span>
                 )}
               </Badge>
             </div>
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CardContent className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Transcription Panel - Always shown */}
             <div className="space-y-4">
-              <h3 className="font-medium text-slate-900 dark:text-white">AI-Assisted Chat</h3>
-              
-              <div className="flex flex-col h-[400px] bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700">
-                <div 
-                  ref={chatContainerRef}
-                  className="flex-1 overflow-y-auto p-4 space-y-4"
-                >
-                  {chatMessages.map((message) => (
-                    <div 
-                      key={message.id} 
-                      className={`flex ${
-                        message.sender === 'assistant' 
-                          ? 'justify-start' 
-                          : message.sender === 'user' 
-                            ? 'justify-end' 
-                            : 'justify-center'
-                      }`}
-                    >
-                      {message.sender === 'system' ? (
-                        <div className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm p-2 rounded-md max-w-[90%] text-center">
-                          {message.text}
-                        </div>
-                      ) : (
-                        <div 
-                          className={`max-w-[80%] p-3 rounded-lg ${
-                            message.sender === 'assistant' 
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' 
-                              : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                          }`}
-                        >
-                          <p className="text-xs font-medium mb-1">
-                            {message.sender === 'assistant' ? 'AI Assistant' : 'You'}
-                          </p>
-                          <p>{message.text}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  
-                  {isGenerating && chatMessages.length > 0 && chatMessages[chatMessages.length - 1].text === "..." && (
-                    <div className="flex justify-start">
-                      <div className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 p-3 rounded-lg max-w-[80%]">
-                        <p className="text-xs font-medium mb-1">AI Assistant</p>
-                        <div className="flex space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                          <div className="w-2 h-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-bounce" style={{ animationDelay: '600ms' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-slate-900 dark:text-white">Transcription</h3>
                 
-                <div className="p-3 border-t border-slate-200 dark:border-slate-700">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      placeholder={isTranscribing ? "Speak or type your message..." : "Type your message..."}
-                      value={currentMessage}
-                      onChange={(e) => setCurrentMessage(e.target.value)}
-                      onKeyDown={handleKeyPress}
-                      disabled={!isLLMLoaded || isGenerating}
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={sendMessage}
-                      disabled={!isLLMLoaded || isGenerating || !currentMessage.trim()}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      {isGenerating ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                    </Button>
+                {isDownloadingModel ? (
+                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Downloading model... {downloadProgress}%</span>
                   </div>
-                  
-                  {isTranscribing && (
-                    <div className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                      <Mic className="h-4 w-4 text-red-500 animate-pulse" />
-                      <span>Listening...</span>
-                    </div>
-                  )}
-                </div>
+                ) : !transcriptionReady ? (
+                  <SecondaryButton 
+                    icon={Download} 
+                    onClick={initializeTranscriptionEngine}
+                    disabled={isDownloadingModel}
+                  >
+                    Prepare Transcription
+                  </SecondaryButton>
+                ) : null}
+              </div>
+              
+              <div className="h-[400px] bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 overflow-y-auto p-4">
+                {transcribedText.length > 0 ? (
+                  <div className="space-y-2">
+                    {transcribedText.map((text, index) => (
+                      <p key={index} className="text-slate-700 dark:text-slate-300">{text}</p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                    <Mic className="h-12 w-12 mb-2 opacity-20" />
+                    <p>No transcription yet</p>
+                    <p className="text-sm">Toggle transcription to start recording</p>
+                  </div>
+                )}
               </div>
             </div>
             
-            <div className="space-y-4">
-              <h3 className="font-medium text-slate-900 dark:text-white">Session Notes</h3>
-              
-              <Textarea 
-                className="h-[400px] resize-none border-slate-200 dark:border-slate-700"
-                placeholder="Enter your session notes here..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
-              
-              <div className="flex justify-end">
-                <PrimaryButton 
-                  icon={Save} 
-                  onClick={saveNotes}
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving...' : 'Save Notes'}
-                </PrimaryButton>
+            {/* AI Chat Panel - Only shown for AI sessions or if user is a patient */}
+            {(session?.isAISession || user?.role === 'patient') && (
+              <div className="space-y-4">
+                <h3 className="font-medium text-slate-900 dark:text-white">AI-Assisted Chat</h3>
+                
+                <div className="flex flex-col h-[400px] bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700">
+                  {isLLMLoading ? (
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                      <Brain className="h-12 w-12 mb-4 text-blue-500 dark:text-blue-400" />
+                      <p className="text-slate-600 dark:text-slate-400 mb-2">Loading AI Assistant...</p>
+                      <div className="w-48 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-500 dark:bg-blue-600 transition-all duration-300 ease-in-out"
+                          style={{ width: `${llmLoadingProgress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">{llmLoadingProgress}%</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div 
+                        ref={chatContainerRef}
+                        className="flex-1 overflow-y-auto p-4 space-y-4"
+                      >
+                        {chatMessages.map((message) => (
+                          <div 
+                            key={message.id} 
+                            className={`flex ${
+                              message.sender === 'assistant' 
+                                ? 'justify-start' 
+                                : message.sender === 'user' 
+                                  ? 'justify-end' 
+                                  : 'justify-center'
+                            }`}
+                          >
+                            {message.sender === 'system' ? (
+                              <div className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm p-2 rounded-md max-w-[90%] text-center">
+                                {message.text}
+                              </div>
+                            ) : (
+                              <div 
+                                className={`max-w-[80%] p-3 rounded-lg ${
+                                  message.sender === 'assistant' 
+                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' 
+                                    : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                }`}
+                              >
+                                <p className="text-xs font-medium mb-1">
+                                  {message.sender === 'assistant' ? 'AI Assistant' : 'You'}
+                                </p>
+                                <p>{message.text}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {isGenerating && chatMessages.length > 0 && chatMessages[chatMessages.length - 1].text === "..." && (
+                          <div className="flex justify-start">
+                            <div className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 p-3 rounded-lg max-w-[80%]">
+                              <p className="text-xs font-medium mb-1">AI Assistant</p>
+                              <div className="flex space-x-2">
+                                <div className="w-2 h-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                <div className="w-2 h-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                <div className="w-2 h-2 rounded-full bg-blue-400 dark:bg-blue-500 animate-bounce" style={{ animationDelay: '600ms' }}></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="p-3 border-t border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            placeholder={isTranscribing ? "Speak or type your message..." : "Type your message..."}
+                            value={currentMessage}
+                            onChange={(e) => setCurrentMessage(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                            disabled={!isLLMLoaded || isGenerating}
+                            className="flex-1"
+                          />
+                          <Button
+                            onClick={sendMessage}
+                            disabled={!isLLMLoaded || isGenerating || !currentMessage.trim()}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            {isGenerating ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Send className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        
+                        {isTranscribing && (
+                          <div className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                            <Mic className="h-4 w-4 text-red-500 animate-pulse" />
+                            <span>Listening...</span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+            
+            {/* Notes Panel - Only shown for therapists */}
+            {user?.role === 'therapist' && (
+              <div className="space-y-4">
+                <h3 className="font-medium text-slate-900 dark:text-white">Session Notes</h3>
+                
+                <Textarea 
+                  className="h-[400px] resize-none border-slate-200 dark:border-slate-700"
+                  placeholder="Enter your session notes here..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+                
+                <div className="flex justify-end">
+                  <PrimaryButton 
+                    icon={Save} 
+                    onClick={saveNotes}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Saving..." : "Save Notes"}
+                  </PrimaryButton>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

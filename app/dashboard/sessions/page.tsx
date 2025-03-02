@@ -20,7 +20,8 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Loader2
 } from "lucide-react";
 import { PrimaryButton, OutlineButton, SecondaryButton } from "@/components/dashboard/DashboardButton";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { DateRange } from "react-day-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, parseISO, isToday, isTomorrow, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
@@ -47,11 +49,22 @@ export default function SessionsPage() {
   const [filterPatient, setFilterPatient] = useState("all");
   const [filterDate, setFilterDate] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterSessionType, setFilterSessionType] = useState("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [datePickerMonth, setDatePickerMonth] = useState<Date>(new Date());
   
+  // Create new session dialog
+  const [showNewSessionDialog, setShowNewSessionDialog] = useState(false);
+  const [newSessionPatient, setNewSessionPatient] = useState("");
+  const [newSessionDate, setNewSessionDate] = useState("");
+  const [newSessionTime, setNewSessionTime] = useState("");
+  const [newSessionType, setNewSessionType] = useState("Follow-up");
+  const [newSessionTreatment, setNewSessionTreatment] = useState("cbt");
+  const [newSessionIsAI, setNewSessionIsAI] = useState(false);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+
   // Sample data for sessions
   const sessions: Session[] = [
     {
@@ -63,7 +76,8 @@ export default function SessionsPage() {
       status: "Upcoming",
       type: "Initial Assessment",
       notes: "",
-      treatmentMethod: "cbt"
+      treatmentMethod: "cbt",
+      isAISession: true
     },
     {
       id: "2",
@@ -74,7 +88,8 @@ export default function SessionsPage() {
       status: "Upcoming",
       type: "Follow-up",
       notes: "",
-      treatmentMethod: "psychodynamic"
+      treatmentMethod: "psychodynamic",
+      isAISession: false
     },
     {
       id: "3",
@@ -85,7 +100,8 @@ export default function SessionsPage() {
       status: "Upcoming",
       type: "Follow-up",
       notes: "",
-      treatmentMethod: "humanistic"
+      treatmentMethod: "humanistic",
+      isAISession: true
     },
     {
       id: "4",
@@ -96,7 +112,8 @@ export default function SessionsPage() {
       status: "Completed",
       type: "Follow-up",
       notes: "Patient reported improved sleep patterns. Continuing with current treatment plan.",
-      treatmentMethod: "cbt"
+      treatmentMethod: "cbt",
+      isAISession: false
     }
   ];
 
@@ -136,6 +153,11 @@ export default function SessionsPage() {
       return false;
     }
     
+    // Filter by session type
+    if (filterSessionType !== "all" && session.isAISession !== (filterSessionType === "AI")) {
+      return false;
+    }
+    
     return true;
   });
 
@@ -166,6 +188,109 @@ export default function SessionsPage() {
 
   const datePickerDays = getDatePickerDays(datePickerMonth);
 
+  const SessionCard = ({ session }: { session: Session }) => {
+    return (
+      <Card className="hover:shadow-md transition-shadow duration-200">
+        <CardContent className="p-0">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 border-2 border-blue-200 dark:border-blue-800">
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
+                  {session.patientName.split(" ").map((n) => n[0]).join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="font-medium text-slate-900 dark:text-white">{session.patientName}</h3>
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <span>{session.date}, {session.time}</span>
+                  <span>•</span>
+                  <span>{session.type}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Badge 
+                className={`
+                  ${session.status === "Upcoming" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" : ""}
+                  ${session.status === "Completed" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : ""}
+                  ${session.status === "Cancelled" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" : ""}
+                `}
+              >
+                {session.status}
+              </Badge>
+              
+              <Badge className={`${
+                session.isAISession 
+                  ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" 
+                  : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+              }`}>
+                {session.isAISession ? "AI" : "In-Person"}
+              </Badge>
+            </div>
+          </div>
+          
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300">
+                {getTherapyTypeName(session.treatmentMethod)}
+              </Badge>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <OutlineButton 
+                onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
+                className="text-sm px-3 py-1 h-auto"
+              >
+                View Details
+              </OutlineButton>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Simpler card for calendar view
+  const CalendarSessionCard = ({ session }: { session: Session }) => {
+    return (
+      <div 
+        key={session.id}
+        className="text-xs p-1 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-between"
+        onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
+      >
+        <div className="flex items-center gap-1">
+          <span className="font-medium">{session.time}</span>
+          <span>•</span>
+          <span>{session.patientName}</span>
+        </div>
+        <Badge className="text-[0.65rem] px-1 py-0 h-4" variant="outline">
+          {session.isAISession ? "AI" : "In-Person"}
+        </Badge>
+      </div>
+    );
+  };
+
+  // Create new session
+  const createNewSession = () => {
+    setIsCreatingSession(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      // In a real app, you would make an API call to create the session
+      setIsCreatingSession(false);
+      setShowNewSessionDialog(false);
+      
+      // Reset form
+      setNewSessionPatient("");
+      setNewSessionDate("");
+      setNewSessionTime("");
+      setNewSessionType("Follow-up");
+      setNewSessionTreatment("cbt");
+      setNewSessionIsAI(false);
+    }, 1000);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -189,7 +314,10 @@ export default function SessionsPage() {
             <Input placeholder="Search sessions..." className="pl-9 border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400" />
           </div>
           {user?.role !== "patient" && (
-            <PrimaryButton icon={Plus}>
+            <PrimaryButton 
+              icon={Plus} 
+              onClick={() => setShowNewSessionDialog(true)}
+            >
               New Session
             </PrimaryButton>
           )}
@@ -208,6 +336,7 @@ export default function SessionsPage() {
               setFilterPatient("all");
               setFilterDate("all");
               setFilterStatus("all");
+              setFilterSessionType("all");
               setDateRange(undefined);
             }}>
               Reset Filters
@@ -335,6 +464,19 @@ export default function SessionsPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="sessionTypeFilter" className="text-slate-700 dark:text-slate-300">Session Type</Label>
+              <Select value={filterSessionType} onValueChange={setFilterSessionType}>
+                <SelectTrigger id="sessionTypeFilter" className="border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400">
+                  <SelectValue placeholder="All Session Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Session Types</SelectItem>
+                  <SelectItem value="AI">AI Sessions</SelectItem>
+                  <SelectItem value="in-person">In-Person Sessions</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -365,82 +507,7 @@ export default function SessionsPage() {
             <CardContent>
               <div className="space-y-4">
                 {filteredSessions.map((session) => (
-                  <div 
-                    key={session.id}
-                    className="flex items-center gap-4 p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
-                      {session.type === "Video Call" ? (
-                        <Video className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                      ) : (
-                        <CalendarIcon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                        <div>
-                          <h3 className="text-lg font-medium text-slate-900 dark:text-white">
-                            Session with {session.patientName}
-                          </h3>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center mt-1">
-                            <Clock className="h-3.5 w-3.5 mr-1" />
-                            {session.date}, {session.time} • {session.type}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                              {session.notes}
-                            </p>
-                            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                              {getTherapyTypeName(session.treatmentMethod)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
-                          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            session.status === "Upcoming" 
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" 
-                              : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          }`}>
-                            {session.status}
-                          </div>
-                          <div className="flex gap-2">
-                            {session.status === "Upcoming" && (
-                              <>
-                                <OutlineButton 
-                                  size="sm" 
-                                  icon={X}
-                                  onClick={() => {
-                                    setSelectedSession(session);
-                                    setShowCancelDialog(true);
-                                  }}
-                                >
-                                  Cancel
-                                </OutlineButton>
-                                {session.date === "Today" && (
-                                  <PrimaryButton 
-                                    size="sm" 
-                                    icon={Play}
-                                    onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
-                                  >
-                                    Start Session
-                                  </PrimaryButton>
-                                )}
-                              </>
-                            )}
-                            {session.status === "Completed" && (
-                              <OutlineButton 
-                                size="sm" 
-                                icon={Download}
-                                onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
-                              >
-                                Notes
-                              </OutlineButton>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <SessionCard key={session.id} session={session} />
                 ))}
               </div>
             </CardContent>
@@ -515,17 +582,7 @@ export default function SessionsPage() {
                       </div>
                       <div className="space-y-1 overflow-y-auto max-h-[80px]">
                         {daysSessions.map((session) => (
-                          <div 
-                            key={session.id}
-                            className="text-xs p-1 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
-                            onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
-                          >
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">{session.time}</span>
-                              <span>•</span>
-                              <span>{session.patientName}</span>
-                            </div>
-                          </div>
+                          <CalendarSessionCard key={session.id} session={session} />
                         ))}
                       </div>
                     </div>
@@ -594,6 +651,116 @@ export default function SessionsPage() {
             >
               Confirm Cancellation
             </PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create New Session Dialog */}
+      <Dialog open={showNewSessionDialog} onOpenChange={setShowNewSessionDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Session</DialogTitle>
+            <DialogDescription>
+              Schedule a new therapy session with a patient.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="patient">Patient</Label>
+              <Select value={newSessionPatient} onValueChange={setNewSessionPatient}>
+                <SelectTrigger id="patient">
+                  <SelectValue placeholder="Select a patient" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="p1">Alex Johnson</SelectItem>
+                  <SelectItem value="p2">Sam Taylor</SelectItem>
+                  <SelectItem value="p3">Jamie Smith</SelectItem>
+                  <SelectItem value="p4">Riley Wilson</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Date</Label>
+                <Input 
+                  id="date" 
+                  type="date" 
+                  value={newSessionDate}
+                  onChange={(e) => setNewSessionDate(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="time">Time</Label>
+                <Input 
+                  id="time" 
+                  type="time" 
+                  value={newSessionTime}
+                  onChange={(e) => setNewSessionTime(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="type">Session Type</Label>
+              <Select value={newSessionType} onValueChange={setNewSessionType}>
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Select session type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Initial Assessment">Initial Assessment</SelectItem>
+                  <SelectItem value="Follow-up">Follow-up</SelectItem>
+                  <SelectItem value="Crisis Intervention">Crisis Intervention</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="treatment">Treatment Method</Label>
+              <Select value={newSessionTreatment} onValueChange={setNewSessionTreatment}>
+                <SelectTrigger id="treatment">
+                  <SelectValue placeholder="Select treatment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cbt">Cognitive Behavioral Therapy (CBT)</SelectItem>
+                  <SelectItem value="psychodynamic">Psychodynamic Therapy</SelectItem>
+                  <SelectItem value="humanistic">Humanistic Therapy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="ai-session" 
+                checked={newSessionIsAI} 
+                onCheckedChange={setNewSessionIsAI}
+              />
+              <Label htmlFor="ai-session">AI-Assisted Session</Label>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowNewSessionDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={createNewSession}
+              disabled={!newSessionPatient || !newSessionDate || !newSessionTime || isCreatingSession}
+            >
+              {isCreatingSession ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Session"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
