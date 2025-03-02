@@ -11,7 +11,7 @@ globs:
   - Tailwind CSS
   - Shadcn UI
 
-- Uses bun instead of npm or yarn
+- Uses npm runtime and package manager
 - Uses Vercel for deployment
 - Uses PostgreSQL for database (Supabase on Vercel)
 - Uses Clerk for authentication
