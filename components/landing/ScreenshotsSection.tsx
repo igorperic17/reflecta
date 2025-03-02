@@ -20,8 +20,8 @@ const Feature: React.FC<FeatureProps> = ({
   reverse = false
 }) => {
   return (
-    <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
-      <div className={`${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
+    <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
+      <div className={`${reverse ? 'lg:order-2 lg:col-span-4' : 'lg:order-1 lg:col-span-4'}`}>
         <ScrollFadeIn direction={reverse ? "right" : "left"} delay={0.1}>
           <div className="space-y-4">
             <div className="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full text-blue-600 dark:text-blue-400 text-sm font-medium">
@@ -36,14 +36,14 @@ const Feature: React.FC<FeatureProps> = ({
         </ScrollFadeIn>
       </div>
       
-      <div className={`${reverse ? 'lg:order-1' : 'lg:order-2'}`}>
+      <div className={`${reverse ? 'lg:order-1 lg:col-span-8' : 'lg:order-2 lg:col-span-8'}`}>
         <ScrollFadeIn direction={reverse ? "left" : "right"} delay={0.2}>
-          <div className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 group">
+          <div className="relative h-[350px] md:h-[500px] rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 group">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-indigo-400/5 group-hover:from-blue-400/10 group-hover:to-indigo-400/10 transition-all duration-500 z-10"></div>
             <img
               src={imageSrc}
               alt={imageAlt}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain p-2"
               loading="lazy"
             />
           </div>
@@ -74,7 +74,7 @@ export const ScreenshotsSection: React.FC = () => {
           </div>
         </ScrollFadeIn>
         
-        <div className="space-y-24">
+        <div className="space-y-32">
           <Feature
             title="AI-Powered Tools"
             description="Leverage cutting-edge AI to enhance your therapy sessions. Our AI tools help analyze session transcripts, provide insights, and suggest therapeutic approaches based on patient responses and progress."
