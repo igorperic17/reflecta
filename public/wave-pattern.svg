@@ -1,0 +1,6 @@
+<svg width="1440" height="400" viewBox="0 0 1440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 80C240 80 240 0 480 0C720 0 720 80 960 80C1200 80 1200 0 1440 0V400H0V80Z" fill="white" fill-opacity="0.05"/>
+  <path d="M0 160C240 160 240 80 480 80C720 80 720 160 960 160C1200 160 1200 80 1440 80V400H0V160Z" fill="white" fill-opacity="0.05"/>
+  <path d="M0 240C240 240 240 160 480 160C720 160 720 240 960 240C1200 240 1200 160 1440 160V400H0V240Z" fill="white" fill-opacity="0.05"/>
+  <path d="M0 320C240 320 240 240 480 240C720 240 720 320 960 320C1200 320 1200 240 1440 240V400H0V320Z" fill="white" fill-opacity="0.05"/>
+</svg> 

@@ -1,0 +1,13 @@
+## Code editing
+
+- Run the app always in your terminal session to observe the output instead of running it in the background terminal.
+
+- Always keep the Readme updated
+- Always keep the Tech stack updated
+- Always keep the Project info updated
+- Always keep the codebase clean and readable
+- Always keep the codebase up to date with the latest technologies
+- Always keep the codebase secure
+- Always keep the codebase efficient
+- Always keep the codebase scalable
+- Always keep the codebase maintainable
