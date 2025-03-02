@@ -1,18 +1,108 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { BrainSVG } from './Illustrations';
-import { FadeIn } from './AnimationWrapper';
-import { ArrowRight, Sparkles, MessageSquare, Shield, Brain } from 'lucide-react';
+import { FadeIn, ScrollFadeIn } from './AnimationWrapper';
+import { ArrowRight, Sparkles, MessageSquare, Shield, Brain, Send } from 'lucide-react';
 
 interface HeroSectionProps {
   mounted: boolean;
 }
 
+interface ChatMessage {
+  id: number;
+  text: string;
+  sender: 'assistant' | 'user';
+  isTyping?: boolean;
+}
+
 export function HeroSection({ mounted }: HeroSectionProps) {
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  
+  const initialMessages: ChatMessage[] = [
+    { id: 1, text: "How are you feeling today? I'm here to support your mental wellbeing journey.", sender: 'assistant' },
+    { id: 2, text: "I've been feeling a bit anxious about work lately.", sender: 'user' },
+    { id: 3, text: "I understand. Let's explore some techniques that might help with work-related anxiety. Would you like to try a quick exercise?", sender: 'assistant' },
+  ];
+  
+  useEffect(() => {
+    if (!mounted) return;
+    
+    // Start the chat animation sequence
+    const showNextMessage = () => {
+      if (currentMessageIndex < initialMessages.length) {
+        setIsTyping(true);
+        
+        // Show typing indicator for assistant messages
+        if (initialMessages[currentMessageIndex].sender === 'assistant') {
+          setTimeout(() => {
+            setIsTyping(false);
+            setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
+            setCurrentMessageIndex(prev => prev + 1);
+          }, 1500); // Typing time
+        } else {
+          // User messages appear more quickly
+          setTimeout(() => {
+            setIsTyping(false);
+            setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
+            setCurrentMessageIndex(prev => prev + 1);
+          }, 800);
+        }
+      }
+    };
+    
+    // Start the sequence with a slight delay
+    if (currentMessageIndex === 0) {
+      setTimeout(showNextMessage, 1000);
+    } else if (currentMessageIndex < initialMessages.length) {
+      // Add delay between messages
+      const delay = initialMessages[currentMessageIndex - 1].sender === 'assistant' ? 1000 : 800;
+      setTimeout(showNextMessage, delay);
+    }
+  }, [mounted, currentMessageIndex, initialMessages]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+  
+  const handleSendMessage = () => {
+    if (inputValue.trim() === '') return;
+    
+    // Add user message
+    const newUserMessage: ChatMessage = {
+      id: chatMessages.length + 1,
+      text: inputValue,
+      sender: 'user'
+    };
+    
+    setChatMessages(prev => [...prev, newUserMessage]);
+    setInputValue('');
+    
+    // Simulate assistant response
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      const newAssistantMessage: ChatMessage = {
+        id: chatMessages.length + 2,
+        text: "That's interesting. I'm here to help you work through those feelings. Would you like to explore some coping strategies?",
+        sender: 'assistant'
+      };
+      setChatMessages(prev => [...prev, newAssistantMessage]);
+    }, 2000);
+  };
+  
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
+
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
       {/* Background gradient */}
@@ -74,21 +164,47 @@ export function HeroSection({ mounted }: HeroSectionProps) {
                   </div>
                   <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Online</div>
                 </div>
-                <div className="space-y-4">
-                  <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg max-w-[80%]">
-                    <p className="text-slate-700 dark:text-slate-300">How are you feeling today? I'm here to support your mental wellbeing journey.</p>
-                  </div>
-                  <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg max-w-[80%] ml-auto">
-                    <p className="text-blue-700 dark:text-blue-300">I've been feeling a bit anxious about work lately.</p>
-                  </div>
-                  <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg max-w-[80%]">
-                    <p className="text-slate-700 dark:text-slate-300">I understand. Let's explore some techniques that might help with work-related anxiety. Would you like to try a quick exercise?</p>
-                  </div>
+                <div className="space-y-4 h-[180px] overflow-y-auto">
+                  {chatMessages.map((message) => (
+                    <div 
+                      key={message.id}
+                      className={`${
+                        message.sender === 'assistant' 
+                          ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300' 
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ml-auto'
+                      } p-3 rounded-lg max-w-[80%] animate-fade-in-up`}
+                    >
+                      <p>{message.text}</p>
+                    </div>
+                  ))}
+                  
+                  {isTyping && (
+                    <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg max-w-[80%] animate-fade-in">
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '600ms' }}></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                   <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 flex items-center">
-                    <input type="text" placeholder="Type your message..." className="bg-transparent border-0 focus:ring-0 flex-1 text-sm text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500" />
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">Send</Button>
+                    <input 
+                      type="text" 
+                      placeholder="Type your message..." 
+                      className="bg-transparent border-0 focus:ring-0 flex-1 text-sm text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      value={inputValue}
+                      onChange={handleInputChange}
+                      onKeyPress={handleKeyPress}
+                    />
+                    <Button 
+                      size="sm" 
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={handleSendMessage}
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
