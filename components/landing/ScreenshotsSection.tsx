@@ -22,31 +22,35 @@ const Feature: React.FC<FeatureProps> = ({
 }) => {
   return (
     <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
-      <ScrollFadeIn direction={reverse ? "right" : "left"} delay={0.1}>
-        <div className="space-y-4">
-          <div className="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full text-blue-600 dark:text-blue-400 text-sm font-medium">
-            {icon}
-            <span>{title}</span>
+      <div className={`${reverse ? 'lg:order-2' : 'lg:order-1'}`}>
+        <ScrollFadeIn direction={reverse ? "right" : "left"} delay={0.1}>
+          <div className="space-y-4">
+            <div className="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full text-blue-600 dark:text-blue-400 text-sm font-medium">
+              {icon}
+              <span>{title}</span>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h3>
+            <p className="text-slate-600 dark:text-slate-300">
+              {description}
+            </p>
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h3>
-          <p className="text-slate-600 dark:text-slate-300">
-            {description}
-          </p>
-        </div>
-      </ScrollFadeIn>
+        </ScrollFadeIn>
+      </div>
       
-      <ScrollFadeIn direction={reverse ? "left" : "right"} delay={0.2}>
-        <div className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 group">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-indigo-400/5 group-hover:from-blue-400/10 group-hover:to-indigo-400/10 transition-all duration-500 z-10"></div>
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
-      </ScrollFadeIn>
+      <div className={`${reverse ? 'lg:order-1' : 'lg:order-2'}`}>
+        <ScrollFadeIn direction={reverse ? "left" : "right"} delay={0.2}>
+          <div className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-indigo-400/5 group-hover:from-blue-400/10 group-hover:to-indigo-400/10 transition-all duration-500 z-10"></div>
+            <Image
+              src={imageSrc}
+              alt={imageAlt}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+        </ScrollFadeIn>
+      </div>
     </div>
   );
 };
@@ -79,6 +83,7 @@ export const ScreenshotsSection: React.FC = () => {
             imageSrc="/ai-tools.png"
             imageAlt="AI Tools Dashboard"
             icon={<Brain className="w-4 h-4" />}
+            reverse={false}
           />
           
           <Feature
@@ -96,6 +101,7 @@ export const ScreenshotsSection: React.FC = () => {
             imageSrc="/billing.png"
             imageAlt="Billing Dashboard"
             icon={<CreditCard className="w-4 h-4" />}
+            reverse={false}
           />
           
           <Feature
