@@ -1,22 +1,35 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { JourneySection } from "@/components/landing/JourneySection";
+import { PrivacySection } from "@/components/landing/PrivacySection";
+import { TechnologySection } from "@/components/landing/TechnologySection";
+import { CTASection } from "@/components/landing/CTASection";
+import { Footer } from "@/components/landing/Footer";
+import { ScreenshotsSection } from "@/components/landing/ScreenshotsSection";
+import "@/app/landing/page.css";
+
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-6">Welcome to Reflecta</h1>
-      <p className="text-xl mb-8">Your AI-powered therapy assistant</p>
-      <div className="flex gap-4">
-        <a 
-          href="/auth/login" 
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Login
-        </a>
-        <a 
-          href="/auth/register" 
-          className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-        >
-          Register
-        </a>
-      </div>
+    <div className="landing-container">
+      <main className="flex-grow">
+        <HeroSection mounted={mounted} />
+        <FeaturesSection />
+        <ScreenshotsSection />
+        <JourneySection />
+        <TechnologySection />
+        <PrivacySection />
+        <CTASection />
+      </main>
+      <Footer />
     </div>
   );
 } 

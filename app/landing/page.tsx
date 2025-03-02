@@ -8,6 +8,7 @@ import { PrivacySection } from "@/components/landing/PrivacySection";
 import { TechnologySection } from "@/components/landing/TechnologySection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
+import { ScreenshotsSection } from "@/components/landing/ScreenshotsSection";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -27,6 +28,7 @@ export default function LandingPage() {
       <main className="flex-grow">
         <HeroSection mounted={mounted} />
         <FeaturesSection />
+        <ScreenshotsSection />
         <JourneySection />
         <TechnologySection />
         <PrivacySection />
