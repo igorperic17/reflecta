@@ -8,7 +8,6 @@ import { PrivacySection } from "@/components/landing/PrivacySection";
 import { TechnologySection } from "@/components/landing/TechnologySection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
-import "./page.css";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -17,8 +16,14 @@ export default function LandingPage() {
     setMounted(true);
   }, []);
 
+  const landingContainerStyle = {
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column" as const,
+  };
+
   return (
-    <div className="landing-container">
+    <div style={landingContainerStyle}>
       <main className="flex-grow">
         <HeroSection mounted={mounted} />
         <FeaturesSection />
