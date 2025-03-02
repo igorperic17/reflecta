@@ -8,6 +8,7 @@ import { PrivacySection } from "@/components/landing/PrivacySection";
 import { TechnologySection } from "@/components/landing/TechnologySection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
+import "./page.css";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -17,7 +18,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-slate-900">
+    <div className="landing-container">
       <main className="flex-grow">
         <HeroSection mounted={mounted} />
         <FeaturesSection />
