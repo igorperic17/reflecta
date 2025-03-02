@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
 import { 
@@ -9,15 +10,11 @@ import {
   Plus,
   Search,
   X,
-  Mic,
-  MicOff,
   Video,
   Download,
   Filter,
   ChevronDown,
   AlertCircle,
-  CheckCircle2,
-  Loader2,
   Play,
   ListFilter,
   CalendarDays,
@@ -32,7 +29,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,88 +36,66 @@ import { DateRange } from "react-day-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, parseISO, isToday, isTomorrow, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
 import { getTherapyTypeName } from "@/lib/therapy-types";
+import { Session } from "@/lib/types";
 
 export default function SessionsPage() {
+  const router = useRouter();
   const { user } = useAuth();
-  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showSessionDialog, setShowSessionDialog] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [transcriptionReady, setTranscriptionReady] = useState(false);
-  const [isLoadingTranscription, setIsLoadingTranscription] = useState(false);
-  const [transcribedText, setTranscribedText] = useState<string[]>([]);
   const [filterPatient, setFilterPatient] = useState("all");
   const [filterDate, setFilterDate] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [transcriptionEngine, setTranscriptionEngine] = useState<any>(null);
-  const [isDownloadingModel, setIsDownloadingModel] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [datePickerMonth, setDatePickerMonth] = useState<Date>(new Date());
   
-  // Sample sessions data
-  const sessions = [
+  // Sample data for sessions
+  const sessions: Session[] = [
     {
       id: "1",
       patientId: "p1",
-      patientName: "Jane Doe",
+      patientName: "Alex Johnson",
       date: "Today",
-      time: "10:30 AM - 11:30 AM",
+      time: "10:00 AM",
       status: "Upcoming",
-      type: "Video Call",
-      notes: "Follow-up on anxiety management techniques",
-      actualDate: new Date(),
+      type: "Initial Assessment",
+      notes: "",
       treatmentMethod: "cbt"
     },
     {
       id: "2",
       patientId: "p2",
-      patientName: "John Smith",
+      patientName: "Sam Taylor",
       date: "Today",
-      time: "2:00 PM - 3:00 PM",
+      time: "2:30 PM",
       status: "Upcoming",
-      type: "In-Person",
-      notes: "Initial assessment",
-      actualDate: new Date(),
-      treatmentMethod: "mindfulness"
+      type: "Follow-up",
+      notes: "",
+      treatmentMethod: "psychodynamic"
     },
     {
       id: "3",
       patientId: "p3",
-      patientName: "Emily Johnson",
-      date: "Yesterday",
-      time: "11:00 AM - 12:00 PM",
-      status: "Completed",
-      type: "Video Call",
-      notes: "Discussed progress with depression management",
-      actualDate: addDays(new Date(), -1),
-      treatmentMethod: "interpersonal"
+      patientName: "Jamie Smith",
+      date: "Tomorrow",
+      time: "11:15 AM",
+      status: "Upcoming",
+      type: "Follow-up",
+      notes: "",
+      treatmentMethod: "humanistic"
     },
     {
       id: "4",
       patientId: "p4",
-      patientName: "Michael Brown",
-      date: "Feb 28, 2024",
-      time: "3:30 PM - 4:30 PM",
+      patientName: "Riley Wilson",
+      date: "Yesterday",
+      time: "3:00 PM",
       status: "Completed",
-      type: "In-Person",
-      notes: "Cognitive behavioral therapy session",
-      actualDate: new Date(2024, 1, 28),
-      treatmentMethod: "cbt"
-    },
-    {
-      id: "5",
-      patientId: "p1",
-      patientName: "Jane Doe",
-      date: "Tomorrow",
-      time: "9:00 AM - 10:00 AM",
-      status: "Upcoming",
-      type: "Video Call",
-      notes: "Weekly check-in",
-      actualDate: addDays(new Date(), 1),
+      type: "Follow-up",
+      notes: "Patient reported improved sleep patterns. Continuing with current treatment plan.",
       treatmentMethod: "cbt"
     }
   ];
@@ -136,124 +110,44 @@ export default function SessionsPage() {
 
   // Filter sessions based on selected filters
   const filteredSessions = sessions.filter(session => {
-    if (filterPatient !== "all" && session.patientId !== filterPatient) return false;
-    
-    // Date range filtering
-    if (dateRange?.from && dateRange?.to) {
-      const sessionDate = new Date(session.date);
-      if (sessionDate < dateRange.from || sessionDate > dateRange.to) return false;
-    } else if (filterDate !== "all") {
-      if (filterDate === "today" && session.date !== "Today") return false;
-      if (filterDate === "tomorrow" && session.date !== "Tomorrow") return false;
-      if (filterDate === "past" && (session.date === "Today" || session.date === "Tomorrow")) return false;
+    // Filter by patient
+    if (filterPatient !== "all" && session.patientId !== filterPatient) {
+      return false;
     }
     
-    if (filterStatus !== "all" && session.status.toLowerCase() !== filterStatus) return false;
+    // Filter by date
+    if (filterDate !== "all") {
+      if (filterDate === "today" && session.date !== "Today") {
+        return false;
+      }
+      if (filterDate === "tomorrow" && session.date !== "Tomorrow") {
+        return false;
+      }
+      if (filterDate === "upcoming" && (session.date === "Today" || session.date === "Yesterday")) {
+        return false;
+      }
+      if (filterDate === "past" && session.date !== "Yesterday") {
+        return false;
+      }
+    }
+    
+    // Filter by status
+    if (filterStatus !== "all" && session.status !== filterStatus) {
+      return false;
+    }
+    
     return true;
   });
 
-  // Simulate loading the transcription model
-  const loadTranscriptionModel = () => {
-    setIsLoadingTranscription(true);
-    // Simulate loading delay
-    setTimeout(() => {
-      setTranscriptionReady(true);
-      setIsLoadingTranscription(false);
-    }, 3000);
-  };
-
-  // Simulate downloading the transcription model
-  const downloadTranscriptionModel = async () => {
-    setIsDownloadingModel(true);
-    setDownloadProgress(0);
-    
-    // Simulate download progress
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setDownloadProgress(i);
-    }
-    
-    // Initialize transcription engine
-    try {
-      // In a real implementation, this would be where you initialize
-      // a speech recognition engine like Whisper.js or use the Web Speech API
-      const recognition = 'webkitSpeechRecognition' in window
-        ? new (window as any).webkitSpeechRecognition()
-        : null;
-        
-      setTranscriptionEngine(recognition);
-      setTranscriptionReady(true);
-    } catch (error) {
-      console.error('Failed to initialize transcription:', error);
-    }
-    
-    setIsDownloadingModel(false);
-  };
-
-  // Handle starting transcription
-  const startTranscription = () => {
-    if (!transcriptionEngine) return;
-    
-    transcriptionEngine.continuous = true;
-    transcriptionEngine.interimResults = true;
-    
-    transcriptionEngine.onresult = (event: any) => {
-      const transcript = Array.from(event.results)
-        .map((result: any) => result[0].transcript)
-        .join('');
-      
-      setTranscribedText(prev => [
-        ...prev,
-        `${user?.role === 'therapist' ? 'Therapist' : 'Patient'}: ${transcript}`
-      ]);
-    };
-    
-    transcriptionEngine.start();
-    setIsTranscribing(true);
-  };
-
-  // Handle stopping transcription
-  const stopTranscription = () => {
-    if (transcriptionEngine) {
-      transcriptionEngine.stop();
-    }
-    setIsTranscribing(false);
-  };
-
-  // Toggle transcription with enhanced handling
-  const toggleTranscription = () => {
-    if (!transcriptionReady && !isLoadingTranscription) {
-      downloadTranscriptionModel();
-    } else if (transcriptionReady) {
-      if (isTranscribing) {
-        stopTranscription();
-      } else {
-        startTranscription();
-      }
-    }
-  };
-
-  // Handle session cancellation
-  const handleCancelSession = () => {
-    // In a real app, you would make an API call to cancel the session
-    console.log(`Cancelling session ${selectedSession?.id} with reason: ${cancelReason}`);
-    setShowCancelDialog(false);
-    setCancelReason("");
-    // Update UI to reflect cancellation
-    // This would typically be handled by refetching data from the server
-  };
-
-  // Handle starting a session
-  const startSession = (session: any) => {
-    setSelectedSession(session);
-    setShowSessionDialog(true);
-  };
-
   // Get sessions for a specific day
   const getSessionsForDay = (day: Date) => {
-    return sessions.filter(session => 
-      isSameDay(session.actualDate, day)
-    );
+    // In a real app, you would compare with actual dates
+    // For this example, we'll just use the string representation
+    const dayStr = isToday(day) ? "Today" : 
+                  isTomorrow(day) ? "Tomorrow" : 
+                  format(day, "MMM d, yyyy");
+    
+    return sessions.filter(session => session.date === dayStr);
   };
 
   // Generate calendar days for the main calendar view
@@ -526,7 +420,7 @@ export default function SessionsPage() {
                                   <PrimaryButton 
                                     size="sm" 
                                     icon={Play}
-                                    onClick={() => startSession(session)}
+                                    onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
                                   >
                                     Start Session
                                   </PrimaryButton>
@@ -534,7 +428,11 @@ export default function SessionsPage() {
                               </>
                             )}
                             {session.status === "Completed" && (
-                              <OutlineButton size="sm" icon={Download}>
+                              <OutlineButton 
+                                size="sm" 
+                                icon={Download}
+                                onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
+                              >
                                 Notes
                               </OutlineButton>
                             )}
@@ -561,23 +459,25 @@ export default function SessionsPage() {
                   >
                     Today
                   </div>
-                  <div 
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-9 w-9 p-0 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 cursor-pointer"
+                  <Button 
+                    variant="outline" 
+                    size="icon"
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                  </div>
-                  <div 
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-9 w-9 p-0 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 cursor-pointer"
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
                   >
                     <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {format(currentMonth, 'MMMM yyyy')}
                   </div>
                 </div>
               </div>
-              <CardDescription className="text-slate-500 dark:text-slate-400">
-                {format(currentMonth, 'MMMM yyyy')}
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-7 gap-1 text-center mb-2">
@@ -618,23 +518,12 @@ export default function SessionsPage() {
                           <div 
                             key={session.id}
                             className="text-xs p-1 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
-                            onClick={() => {
-                              setSelectedSession(session);
-                              if (session.status === "Upcoming" && session.date === "Today") {
-                                startSession(session);
-                              }
-                            }}
+                            onClick={() => router.push(`/dashboard/sessions/${session.id}`)}
                           >
                             <div className="flex items-center gap-1">
-                              <div className={`w-2 h-2 rounded-full ${
-                                session.status === "Upcoming" 
-                                  ? "bg-blue-500 dark:bg-blue-400" 
-                                  : "bg-green-500 dark:bg-green-400"
-                              }`} />
-                              <span className="font-medium truncate">{session.patientName}</span>
-                            </div>
-                            <div className="ml-3 text-slate-500 dark:text-slate-400 truncate">
-                              {session.time.split(' - ')[0]} • {getTherapyTypeName(session.treatmentMethod).split('(')[0].trim()}
+                              <span className="font-medium">{session.time}</span>
+                              <span>•</span>
+                              <span>{session.patientName}</span>
                             </div>
                           </div>
                         ))}
@@ -693,154 +582,19 @@ export default function SessionsPage() {
               Back
             </OutlineButton>
             <PrimaryButton 
-              onClick={handleCancelSession}
+              onClick={() => {
+                // In a real app, you would make an API call to cancel the session
+                console.log(`Cancelling session ${selectedSession?.id} with reason: ${cancelReason}`);
+                setShowCancelDialog(false);
+                setCancelReason("");
+                // Update UI to reflect cancellation
+                // This would typically be handled by refetching data from the server
+              }}
               disabled={!cancelReason.trim()}
             >
               Confirm Cancellation
             </PrimaryButton>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Active Session Dialog */}
-      <Dialog open={showSessionDialog} onOpenChange={setShowSessionDialog}>
-        <DialogContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 max-w-4xl h-[80vh] flex flex-col">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="border-2 border-blue-200 dark:border-blue-800">
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
-                    {selectedSession?.patientName.split(" ").map((n: string) => n[0]).join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <DialogTitle className="text-slate-900 dark:text-white">Session with {selectedSession?.patientName}</DialogTitle>
-                  <div className="flex items-center gap-2">
-                    <DialogDescription className="text-slate-500 dark:text-slate-400">
-                      {selectedSession?.date}, {selectedSession?.time} • {selectedSession?.type}
-                    </DialogDescription>
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                      {selectedSession?.treatmentMethod ? getTherapyTypeName(selectedSession.treatmentMethod) : ""}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="transcription" className="text-slate-700 dark:text-slate-300 text-sm">
-                    Transcription
-                  </Label>
-                  <Switch 
-                    id="transcription" 
-                    checked={isTranscribing} 
-                    onCheckedChange={toggleTranscription}
-                    disabled={isLoadingTranscription || !transcriptionReady}
-                  />
-                </div>
-                <Badge 
-                  className={`${
-                    isLoadingTranscription 
-                      ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" 
-                      : transcriptionReady 
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-slate-100 text-slate-800 dark:bg-slate-700/50 dark:text-slate-300"
-                  }`}
-                >
-                  {isLoadingTranscription ? (
-                    <div className="flex items-center gap-1">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      <span>Loading Model...</span>
-                    </div>
-                  ) : transcriptionReady ? (
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      <span>Transcription Ready</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <span>Transcription Not Loaded</span>
-                    </div>
-                  )}
-                </Badge>
-              </div>
-            </div>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-auto my-4 p-4 bg-slate-50 dark:bg-slate-700/30 rounded-md">
-            {isTranscribing ? (
-              <div className="space-y-4">
-                {transcribedText.length > 0 ? (
-                  transcribedText.map((text, index) => {
-                    const [speaker, message] = text.split(': ');
-                    return (
-                      <div 
-                        key={index} 
-                        className={`flex ${speaker === 'Therapist' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div 
-                          className={`max-w-[80%] p-3 rounded-lg ${
-                            speaker === 'Therapist' 
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' 
-                              : 'bg-slate-200 text-slate-800 dark:bg-slate-600 dark:text-slate-200'
-                          }`}
-                        >
-                          <p className="text-xs font-medium mb-1">{speaker}</p>
-                          <p>{message}</p>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <Mic className="h-12 w-12 text-blue-500 dark:text-blue-400 mx-auto mb-4 animate-pulse" />
-                      <p className="text-slate-600 dark:text-slate-300">Listening... Start speaking to see transcription.</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <MicOff className="h-12 w-12 text-slate-400 dark:text-slate-500 mx-auto mb-4" />
-                  <p className="text-slate-600 dark:text-slate-300">Transcription is turned off. Toggle the switch to enable.</p>
-                  {!transcriptionReady && !isLoadingTranscription && (
-                    <SecondaryButton 
-                      className="mt-4" 
-                      onClick={loadTranscriptionModel}
-                    >
-                      Load Transcription Model
-                    </SecondaryButton>
-                  )}
-                </div>
-              </div>
-            )}
-            {isDownloadingModel && (
-              <div className="space-y-2">
-                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-300"
-                    style={{ width: `${downloadProgress}%` }}
-                  />
-                </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
-                  Downloading transcription model: {downloadProgress}%
-                </p>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-auto">
-            <div className="flex items-center gap-4">
-              <Input 
-                placeholder="Type notes here..." 
-                className="border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400"
-              />
-              <PrimaryButton>
-                Save Notes
-              </PrimaryButton>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </div>
