@@ -5,7 +5,7 @@ import { LucideIcon } from 'lucide-react';
 
 interface DashboardButtonProps extends Omit<React.ComponentPropsWithoutRef<typeof Button>, 'variant'> {
   icon?: LucideIcon;
-  variant?: 'primary' | 'outline' | 'secondary' | 'ghost' | 'destructive';
+  variant?: 'primary' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'subtle-destructive';
 }
 
 export const DashboardButton: React.FC<DashboardButtonProps> = ({
@@ -28,6 +28,8 @@ export const DashboardButton: React.FC<DashboardButtonProps> = ({
         return 'ghost';
       case 'destructive':
         return 'destructive';
+      case 'subtle-destructive':
+        return 'ghost';
       default:
         return 'default';
     }
@@ -45,6 +47,8 @@ export const DashboardButton: React.FC<DashboardButtonProps> = ({
         return "text-slate-700 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-300 dark:hover:text-blue-400 dark:hover:bg-slate-700/50 transition-all duration-300";
       case 'destructive':
         return "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0";
+      case 'subtle-destructive':
+        return "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300";
       default:
         return "";
     }
@@ -80,4 +84,8 @@ export const GhostButton: React.FC<DashboardButtonProps> = (props) => (
 
 export const DestructiveButton: React.FC<DashboardButtonProps> = (props) => (
   <DashboardButton variant="destructive" {...props} />
+);
+
+export const SubtleDestructiveButton: React.FC<DashboardButtonProps> = (props) => (
+  <DashboardButton variant="subtle-destructive" {...props} />
 ); 

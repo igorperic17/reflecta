@@ -18,7 +18,7 @@ import {
   MessageSquare,
   Bell
 } from "lucide-react";
-import { GhostButton, DestructiveButton } from "@/components/dashboard/DashboardButton";
+import { GhostButton, SubtleDestructiveButton } from "@/components/dashboard/DashboardButton";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -101,13 +101,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               Settings
             </GhostButton>
           </Link>
-          <DestructiveButton 
+          <SubtleDestructiveButton 
             icon={LogOut}
             className="w-full justify-start" 
             onClick={handleLogout}
           >
             Logout
-          </DestructiveButton>
+          </SubtleDestructiveButton>
         </nav>
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
           <div className="flex items-center space-x-3">
