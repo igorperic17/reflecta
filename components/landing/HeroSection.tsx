@@ -29,7 +29,7 @@ export function HeroSection({ mounted }: HeroSectionProps) {
             <div className="space-y-4">
               <FadeIn>
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
-                  Reflecta: AI-Powered Mental Healthcare
+                  Reflekta: AI-Powered Mental Healthcare
                 </h1>
               </FadeIn>
               <FadeIn direction="up">
@@ -70,7 +70,7 @@ export function HeroSection({ mounted }: HeroSectionProps) {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold">R</div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white">Reflecta Assistant</h3>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">Reflekta Assistant</h3>
                   </div>
                   <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Online</div>
                 </div>
