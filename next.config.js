@@ -10,8 +10,8 @@ const nextConfig = {
         pathname: '**',
       },
     ],
-    // Ensure local images are properly optimized
-    unoptimized: false,
+    // Disable image optimization to fix production issues
+    unoptimized: true,
   },
   // Removing all experimental features
 };

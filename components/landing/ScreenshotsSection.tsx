@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { ScrollFadeIn } from './AnimationWrapper';
 import { Zap, Users, CreditCard, Brain } from 'lucide-react';
 
@@ -41,13 +40,11 @@ const Feature: React.FC<FeatureProps> = ({
         <ScrollFadeIn direction={reverse ? "left" : "right"} delay={0.2}>
           <div className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 group">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-indigo-400/5 group-hover:from-blue-400/10 group-hover:to-indigo-400/10 transition-all duration-500 z-10"></div>
-            <Image
+            <img
               src={imageSrc}
               alt={imageAlt}
-              fill
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
+              className="w-full h-full object-contain"
+              loading="lazy"
             />
           </div>
         </ScrollFadeIn>
