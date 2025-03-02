@@ -39,6 +39,7 @@ import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, parseISO, isToday, isTomorrow, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
+import { getTherapyTypeName } from "@/lib/therapy-types";
 
 export default function SessionsPage() {
   const { user } = useAuth();
@@ -72,7 +73,8 @@ export default function SessionsPage() {
       status: "Upcoming",
       type: "Video Call",
       notes: "Follow-up on anxiety management techniques",
-      actualDate: new Date()
+      actualDate: new Date(),
+      treatmentMethod: "cbt"
     },
     {
       id: "2",
@@ -83,7 +85,8 @@ export default function SessionsPage() {
       status: "Upcoming",
       type: "In-Person",
       notes: "Initial assessment",
-      actualDate: new Date()
+      actualDate: new Date(),
+      treatmentMethod: "mindfulness"
     },
     {
       id: "3",
@@ -94,7 +97,8 @@ export default function SessionsPage() {
       status: "Completed",
       type: "Video Call",
       notes: "Discussed progress with depression management",
-      actualDate: addDays(new Date(), -1)
+      actualDate: addDays(new Date(), -1),
+      treatmentMethod: "interpersonal"
     },
     {
       id: "4",
@@ -105,7 +109,8 @@ export default function SessionsPage() {
       status: "Completed",
       type: "In-Person",
       notes: "Cognitive behavioral therapy session",
-      actualDate: new Date(2024, 1, 28)
+      actualDate: new Date(2024, 1, 28),
+      treatmentMethod: "cbt"
     },
     {
       id: "5",
@@ -116,7 +121,8 @@ export default function SessionsPage() {
       status: "Upcoming",
       type: "Video Call",
       notes: "Weekly check-in",
-      actualDate: addDays(new Date(), 1)
+      actualDate: addDays(new Date(), 1),
+      treatmentMethod: "cbt"
     }
   ];
 
@@ -486,9 +492,14 @@ export default function SessionsPage() {
                             <Clock className="h-3.5 w-3.5 mr-1" />
                             {session.date}, {session.time} • {session.type}
                           </p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            {session.notes}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                              {session.notes}
+                            </p>
+                            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                              {getTherapyTypeName(session.treatmentMethod)}
+                            </div>
+                          </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
                           <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -623,7 +634,7 @@ export default function SessionsPage() {
                               <span className="font-medium truncate">{session.patientName}</span>
                             </div>
                             <div className="ml-3 text-slate-500 dark:text-slate-400 truncate">
-                              {session.time.split(' - ')[0]}
+                              {session.time.split(' - ')[0]} • {getTherapyTypeName(session.treatmentMethod).split('(')[0].trim()}
                             </div>
                           </div>
                         ))}
@@ -704,9 +715,14 @@ export default function SessionsPage() {
                 </Avatar>
                 <div>
                   <DialogTitle className="text-slate-900 dark:text-white">Session with {selectedSession?.patientName}</DialogTitle>
-                  <DialogDescription className="text-slate-500 dark:text-slate-400">
-                    {selectedSession?.date}, {selectedSession?.time} • {selectedSession?.type}
-                  </DialogDescription>
+                  <div className="flex items-center gap-2">
+                    <DialogDescription className="text-slate-500 dark:text-slate-400">
+                      {selectedSession?.date}, {selectedSession?.time} • {selectedSession?.type}
+                    </DialogDescription>
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                      {selectedSession?.treatmentMethod ? getTherapyTypeName(selectedSession.treatmentMethod) : ""}
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-4">

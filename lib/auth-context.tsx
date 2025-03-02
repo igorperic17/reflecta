@@ -6,6 +6,7 @@ type User = {
   name: string;
   email: string;
   role: "admin" | "therapist" | "patient";
+  specialties?: string[]; // Array of therapy type IDs for therapists
 };
 
 type AuthContextType = {
@@ -13,6 +14,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  updateUserSpecialties: (specialties: string[]) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: "Dr. Jane Wilson",
         email: "jane.wilson@reflekta.ai",
         role: "therapist" as const,
+        specialties: ["cbt", "mindfulness", "interpersonal"] // Default specialties
       };
       setUser(user);
       if (typeof window !== "undefined") {
@@ -84,8 +87,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Function to update user specialties
+  const updateUserSpecialties = (specialties: string[]) => {
+    if (user && user.role === "therapist") {
+      const updatedUser = { ...user, specialties };
+      setUser(updatedUser);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("reflekta-user", JSON.stringify(updatedUser));
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, updateUserSpecialties }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,16 +9,45 @@ import {
   Shield,
   Lock,
   Bell,
-  Settings
+  Settings,
+  Briefcase
 } from "lucide-react";
 import { PrimaryButton, OutlineButton } from "@/components/dashboard/DashboardButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { therapyTypes } from "@/lib/therapy-types";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUserSpecialties } = useAuth();
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+
+  // Initialize selected specialties from user data
+  useEffect(() => {
+    if (user?.specialties) {
+      setSelectedSpecialties(user.specialties);
+    }
+  }, [user?.specialties]);
+
+  // Handle specialty toggle
+  const toggleSpecialty = (specialtyId: string) => {
+    setSelectedSpecialties(prev => {
+      if (prev.includes(specialtyId)) {
+        return prev.filter(id => id !== specialtyId);
+      } else {
+        return [...prev, specialtyId];
+      }
+    });
+  };
+
+  // Save specialties
+  const saveSpecialties = () => {
+    updateUserSpecialties(selectedSpecialties);
+  };
 
   return (
     <div className="space-y-8">
@@ -72,6 +101,11 @@ export default function ProfilePage() {
               <TabsTrigger value="personal" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
                 Personal Info
               </TabsTrigger>
+              {user?.role === "therapist" && (
+                <TabsTrigger value="specialties" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
+                  Specialties
+                </TabsTrigger>
+              )}
               <TabsTrigger value="security" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
                 Security
               </TabsTrigger>
@@ -127,6 +161,71 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {user?.role === "therapist" && (
+              <TabsContent value="specialties">
+                <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
+                      <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      Therapy Specialties
+                    </CardTitle>
+                    <CardDescription className="text-slate-500 dark:text-slate-400">
+                      Select the therapy approaches and methods you specialize in
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {selectedSpecialties.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {selectedSpecialties.map(specialtyId => {
+                            const therapyType = therapyTypes.find(type => type.id === specialtyId);
+                            return (
+                              <Badge 
+                                key={specialtyId}
+                                className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800/50 cursor-pointer"
+                                onClick={() => toggleSpecialty(specialtyId)}
+                              >
+                                {therapyType?.name}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {therapyTypes.map(therapyType => (
+                          <div key={therapyType.id} className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                            <Checkbox 
+                              id={`specialty-${therapyType.id}`}
+                              checked={selectedSpecialties.includes(therapyType.id)}
+                              onCheckedChange={() => toggleSpecialty(therapyType.id)}
+                              className="mt-1"
+                            />
+                            <div>
+                              <Label 
+                                htmlFor={`specialty-${therapyType.id}`}
+                                className="text-slate-900 dark:text-white font-medium cursor-pointer"
+                              >
+                                {therapyType.name}
+                              </Label>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                {therapyType.description}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="pt-6 flex justify-end">
+                      <PrimaryButton onClick={saveSpecialties}>
+                        Save Specialties
+                      </PrimaryButton>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
 
             <TabsContent value="security">
               <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm">
