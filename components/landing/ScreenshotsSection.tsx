@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollFadeIn } from './AnimationWrapper';
-import { Zap, Users, CreditCard, Brain } from 'lucide-react';
+import { Zap, Users, CreditCard, Brain, Image as ImageIcon } from 'lucide-react';
+
+// Placeholder component to use if both primary and fallback images fail
+const ImagePlaceholder = ({ title }: { title: string }) => (
+  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800">
+    <ImageIcon className="w-16 h-16 text-slate-400 dark:text-slate-500 mb-4" />
+    <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">{title} Screenshot</p>
+    <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">Image could not be loaded</p>
+  </div>
+);
 
 interface FeatureProps {
   title: string;
   description: string;
   imageSrc: string;
+  fallbackImageSrc: string;
   imageAlt: string;
   icon: React.ReactNode;
   reverse?: boolean;
@@ -15,10 +25,24 @@ const Feature: React.FC<FeatureProps> = ({
   title,
   description,
   imageSrc,
+  fallbackImageSrc,
   imageAlt,
   icon,
   reverse = false
 }) => {
+  const [imgError, setImgError] = useState(false);
+  const [fallbackError, setFallbackError] = useState(false);
+
+  const handleImageError = () => {
+    console.log(`Error loading image: ${imageSrc}, trying fallback`);
+    setImgError(true);
+  };
+
+  const handleFallbackError = () => {
+    console.log(`Error loading fallback image: ${fallbackImageSrc}, using placeholder`);
+    setFallbackError(true);
+  };
+
   return (
     <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 items-center ${reverse ? 'lg:flex-row-reverse' : ''}`}>
       <div className={`${reverse ? 'lg:order-2 lg:col-span-4' : 'lg:order-1 lg:col-span-4'}`}>
@@ -40,12 +64,17 @@ const Feature: React.FC<FeatureProps> = ({
         <ScrollFadeIn direction={reverse ? "left" : "right"} delay={0.2}>
           <div className="relative h-[350px] md:h-[500px] rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700 group">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-indigo-400/5 group-hover:from-blue-400/10 group-hover:to-indigo-400/10 transition-all duration-500 z-10"></div>
-            <img
-              src={imageSrc}
-              alt={imageAlt}
-              className="w-full h-full object-contain p-2"
-              loading="lazy"
-            />
+            {fallbackError ? (
+              <ImagePlaceholder title={title} />
+            ) : (
+              <img
+                src={imgError ? fallbackImageSrc : imageSrc}
+                alt={imageAlt}
+                className="w-full h-full object-contain p-2"
+                loading="lazy"
+                onError={imgError ? handleFallbackError : handleImageError}
+              />
+            )}
           </div>
         </ScrollFadeIn>
       </div>
@@ -78,7 +107,8 @@ export const ScreenshotsSection: React.FC = () => {
           <Feature
             title="AI-Powered Tools"
             description="Leverage cutting-edge AI to enhance your therapy sessions. Our AI tools help analyze session transcripts, provide insights, and suggest therapeutic approaches based on patient responses and progress."
-            imageSrc="/ai-tools.png"
+            imageSrc="/images/screenshots/ai-tools.png"
+            fallbackImageSrc="/ai-tools.png"
             imageAlt="AI Tools Dashboard"
             icon={<Brain className="w-4 h-4" />}
             reverse={false}
@@ -87,7 +117,8 @@ export const ScreenshotsSection: React.FC = () => {
           <Feature
             title="Patient Management"
             description="Easily manage your patient records, track progress, and organize session notes. Our intuitive interface makes it simple to access patient history, treatment plans, and upcoming appointments."
-            imageSrc="/patient-management.png"
+            imageSrc="/images/screenshots/patient-management.png"
+            fallbackImageSrc="/patient-management.png"
             imageAlt="Patient Management Dashboard"
             icon={<Users className="w-4 h-4" />}
             reverse={true}
@@ -96,7 +127,8 @@ export const ScreenshotsSection: React.FC = () => {
           <Feature
             title="Billing Dashboard"
             description="Streamline your practice's finances with our comprehensive billing system. Track payments, generate invoices, and manage insurance claims all in one place, saving you time and reducing administrative overhead."
-            imageSrc="/billing.png"
+            imageSrc="/images/screenshots/billing.png"
+            fallbackImageSrc="/billing.png"
             imageAlt="Billing Dashboard"
             icon={<CreditCard className="w-4 h-4" />}
             reverse={false}
@@ -105,7 +137,8 @@ export const ScreenshotsSection: React.FC = () => {
           <Feature
             title="Therapy Methods"
             description="Access a wide range of evidence-based therapy methods and resources. Our platform provides templates, guides, and tools for various therapeutic approaches, helping you deliver the best care for your patients."
-            imageSrc="/therapy-methods.png"
+            imageSrc="/images/screenshots/therapy-methods.png"
+            fallbackImageSrc="/therapy-methods.png"
             imageAlt="Therapy Methods Dashboard"
             icon={<Brain className="w-4 h-4" />}
             reverse={true}
