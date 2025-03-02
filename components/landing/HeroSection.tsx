@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -16,19 +16,22 @@ interface ChatMessage {
   id: number;
   text: string;
   sender: 'assistant' | 'user';
-  isTyping?: boolean;
 }
 
 export function HeroSection({ mounted }: HeroSectionProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const initialMessages: ChatMessage[] = [
-    { id: 1, text: "How are you feeling today? I'm here to support your mental wellbeing journey.", sender: 'assistant' },
-    { id: 2, text: "I've been feeling a bit anxious about work lately.", sender: 'user' },
-    { id: 3, text: "I understand. Let's explore some techniques that might help with work-related anxiety. Would you like to try a quick exercise?", sender: 'assistant' },
+    { id: 1, text: "Hello there. How are you feeling today?", sender: 'assistant' },
+    { id: 2, text: "I'm not sure... I've been feeling overwhelmed lately and can't really pinpoint why.", sender: 'user' },
+    { id: 3, text: "That's completely understandable. Sometimes our emotions can feel complex and difficult to identify. Would you like to explore what might be contributing to that feeling?", sender: 'assistant' },
+    { id: 4, text: "Yes, I think that would help. I've been having trouble sleeping and my thoughts keep racing.", sender: 'user' },
+    { id: 5, text: "I hear you. Sleep difficulties and racing thoughts can definitely contribute to feeling overwhelmed. Let's try a brief grounding exercise to help you connect with your present experience. Would that be okay?", sender: 'assistant' },
+    { id: 6, text: "I'd like to try that. What should I do?", sender: 'user' },
+    { id: 7, text: "Great. Let's start with a simple breathing exercise. Take a slow, deep breath in for 4 counts, hold for 2, and exhale for 6. We'll do this together a few times to help calm your nervous system.", sender: 'assistant' },
   ];
   
   useEffect(() => {
@@ -41,18 +44,33 @@ export function HeroSection({ mounted }: HeroSectionProps) {
         
         // Show typing indicator for assistant messages
         if (initialMessages[currentMessageIndex].sender === 'assistant') {
+          // Longer typing time for assistant based on message length
+          const typingTime = Math.min(1500 + initialMessages[currentMessageIndex].text.length * 10, 3500);
+          
           setTimeout(() => {
             setIsTyping(false);
             setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
             setCurrentMessageIndex(prev => prev + 1);
-          }, 1500); // Typing time
+            
+            // Scroll to bottom
+            if (chatContainerRef.current) {
+              chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+          }, typingTime);
         } else {
           // User messages appear more quickly
+          const typingTime = Math.min(800 + initialMessages[currentMessageIndex].text.length * 5, 2000);
+          
           setTimeout(() => {
             setIsTyping(false);
             setChatMessages(prev => [...prev, initialMessages[currentMessageIndex]]);
             setCurrentMessageIndex(prev => prev + 1);
-          }, 800);
+            
+            // Scroll to bottom
+            if (chatContainerRef.current) {
+              chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+          }, typingTime);
         }
       }
     };
@@ -62,46 +80,10 @@ export function HeroSection({ mounted }: HeroSectionProps) {
       setTimeout(showNextMessage, 1000);
     } else if (currentMessageIndex < initialMessages.length) {
       // Add delay between messages
-      const delay = initialMessages[currentMessageIndex - 1].sender === 'assistant' ? 1000 : 800;
+      const delay = initialMessages[currentMessageIndex - 1].sender === 'assistant' ? 1200 : 1000;
       setTimeout(showNextMessage, delay);
     }
   }, [mounted, currentMessageIndex, initialMessages]);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
-  
-  const handleSendMessage = () => {
-    if (inputValue.trim() === '') return;
-    
-    // Add user message
-    const newUserMessage: ChatMessage = {
-      id: chatMessages.length + 1,
-      text: inputValue,
-      sender: 'user'
-    };
-    
-    setChatMessages(prev => [...prev, newUserMessage]);
-    setInputValue('');
-    
-    // Simulate assistant response
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      const newAssistantMessage: ChatMessage = {
-        id: chatMessages.length + 2,
-        text: "That's interesting. I'm here to help you work through those feelings. Would you like to explore some coping strategies?",
-        sender: 'assistant'
-      };
-      setChatMessages(prev => [...prev, newAssistantMessage]);
-    }, 2000);
-  };
-  
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
 
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
@@ -164,7 +146,7 @@ export function HeroSection({ mounted }: HeroSectionProps) {
                   </div>
                   <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Online</div>
                 </div>
-                <div className="space-y-4 h-[180px] overflow-y-auto">
+                <div ref={chatContainerRef} className="space-y-4 h-[220px] overflow-y-auto pr-2">
                   {chatMessages.map((message) => (
                     <div 
                       key={message.id}
@@ -172,14 +154,14 @@ export function HeroSection({ mounted }: HeroSectionProps) {
                         message.sender === 'assistant' 
                           ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300' 
                           : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ml-auto'
-                      } p-3 rounded-lg max-w-[80%] animate-fade-in-up`}
+                      } p-3 rounded-lg max-w-[85%] animate-fade-in-up`}
                     >
                       <p>{message.text}</p>
                     </div>
                   ))}
                   
                   {isTyping && (
-                    <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg max-w-[80%] animate-fade-in">
+                    <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg max-w-[85%] animate-fade-in">
                       <div className="flex space-x-2">
                         <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
                         <div className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
@@ -194,14 +176,12 @@ export function HeroSection({ mounted }: HeroSectionProps) {
                       type="text" 
                       placeholder="Type your message..." 
                       className="bg-transparent border-0 focus:ring-0 flex-1 text-sm text-slate-600 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                      value={inputValue}
-                      onChange={handleInputChange}
-                      onKeyPress={handleKeyPress}
+                      disabled
                     />
                     <Button 
                       size="sm" 
                       className="bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={handleSendMessage}
+                      disabled
                     >
                       <Send className="w-4 h-4" />
                     </Button>

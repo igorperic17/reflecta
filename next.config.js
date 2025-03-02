@@ -2,12 +2,18 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['ui-avatars.com'], // Allow images from UI Avatars service
+    // Replace domains with remotePatterns for better security and flexibility
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        pathname: '**',
+      },
+    ],
+    // Ensure local images are properly optimized
+    unoptimized: false,
   },
-  experimental: {
-    optimizeCss: false, // Disable CSS optimization to fix build error
-    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
-  },
-}
+  // Removing all experimental features
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig; 
