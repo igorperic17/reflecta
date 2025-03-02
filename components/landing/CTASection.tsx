@@ -20,7 +20,7 @@ export const CTASection: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <ScrollFadeIn direction="up" delay={0.2}>
-                <Link href="/auth/register">
+                <Link href="/auth/login">
                   <Button size="lg" className="bg-white text-indigo-600 hover:bg-blue-50 hover:text-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto">
                     Start Your Free Trial
                     <ArrowRight className="ml-2 h-4 w-4" />

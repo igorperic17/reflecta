@@ -133,18 +133,22 @@ export function HeroSection({ mounted }: HeroSectionProps) {
               </FadeIn>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/auth/register">
-                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300 border-0 w-full sm:w-auto">
-                  <span>Get Started</span>
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="#features">
-                <Button variant="outline" size="lg" className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-slate-800 transition-all duration-300 w-full sm:w-auto">
-                  Explore Features
-                </Button>
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <FadeIn delay={0.2}>
+                <Link href="/auth/login">
+                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto">
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </FadeIn>
+              <FadeIn delay={0.3}>
+                <Link href="/auth/login">
+                  <Button size="lg" variant="outline" className="border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 w-full sm:w-auto">
+                    Try Demo
+                  </Button>
+                </Link>
+              </FadeIn>
             </div>
             
             <div className="flex items-center space-x-4 text-sm text-slate-500 dark:text-slate-400">
