@@ -16,15 +16,96 @@ import {
   Clock,
   Eye,
   CheckCircle2,
-  CalendarDays
+  CalendarDays,
+  Bot,
+  CheckCircle,
+  XCircle,
+  AlertCircle
 } from "lucide-react";
 import { PrimaryButton, OutlineButton } from "@/components/dashboard/DashboardButton";
 import { useRouter } from "next/navigation";
 import { UserAvatar } from "@/components/dashboard/UserAvatar";
+import { useState } from "react";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+
+// Sample session request data
+const sessionRequests = [
+  {
+    id: "req1",
+    patientId: "p1",
+    patientName: "Alex Johnson",
+    requestDate: "2023-06-10",
+    preferredDate: "2023-06-15",
+    preferredTime: "14:00",
+    sessionType: "Follow-up",
+    treatmentMethod: "Cognitive Behavioral Therapy (CBT)",
+    notes: "I'd like to discuss my progress with the anxiety management techniques we've been working on.",
+    status: "pending"
+  },
+  {
+    id: "req2",
+    patientId: "p2",
+    patientName: "Sam Taylor",
+    requestDate: "2023-06-09",
+    preferredDate: "2023-06-14",
+    preferredTime: "10:30",
+    sessionType: "Crisis Intervention",
+    treatmentMethod: "Mindfulness-Based Therapy",
+    notes: "I've been experiencing increased panic attacks this week and need some additional support.",
+    status: "pending"
+  },
+  {
+    id: "req3",
+    patientId: "p3",
+    patientName: "Jamie Smith",
+    requestDate: "2023-06-08",
+    preferredDate: "2023-06-16",
+    preferredTime: "16:00",
+    sessionType: "Initial Assessment",
+    treatmentMethod: "Psychodynamic Therapy",
+    notes: "",
+    status: "pending"
+  }
+];
 
 export default function TherapistDashboard() {
   const { user } = useAuth();
   const router = useRouter();
+  const [requests, setRequests] = useState(sessionRequests);
+
+  // Handle approving a session request
+  const handleApproveRequest = (requestId: string) => {
+    // Update the request status locally
+    setRequests(prevRequests => 
+      prevRequests.map(req => 
+        req.id === requestId ? { ...req, status: "approved" } : req
+      )
+    );
+    
+    // Show success message
+    toast.success("Session request approved. The patient has been notified.");
+    
+    // In a real app, you would make an API call to update the request status
+  };
+  
+  // Handle declining a session request
+  const handleDeclineRequest = (requestId: string) => {
+    // Update the request status locally
+    setRequests(prevRequests => 
+      prevRequests.map(req => 
+        req.id === requestId ? { ...req, status: "declined" } : req
+      )
+    );
+    
+    // Show success message
+    toast.success("Session request declined. The patient has been notified.");
+    
+    // In a real app, you would make an API call to update the request status
+  };
 
   return (
     <div className="space-y-8">
@@ -86,7 +167,7 @@ export default function TherapistDashboard() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">AI Assisted Sessions</CardTitle>
             <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             </div>
           </CardHeader>
           <CardContent>
@@ -124,6 +205,9 @@ export default function TherapistDashboard() {
           </TabsTrigger>
           <TabsTrigger value="notes" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
             Session Notes
+          </TabsTrigger>
+          <TabsTrigger value="requests" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
+            Session Requests
           </TabsTrigger>
         </TabsList>
         <TabsContent value="today" className="space-y-4">
@@ -294,6 +378,106 @@ export default function TherapistDashboard() {
                   </OutlineButton>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="requests" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Session Requests</CardTitle>
+              <CardDescription>
+                Manage session requests from your patients.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {requests.length === 0 ? (
+                <div className="text-center p-6 text-muted-foreground">
+                  No session requests at this time.
+                </div>
+              ) : (
+                requests.map((request) => (
+                  <div key={request.id} className="p-4 border rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Avatar className="h-10 w-10 mr-4">
+                          <AvatarFallback>{request.patientName.split(" ").map(n => n[0]).join("")}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{request.patientName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Requested on {format(new Date(request.requestDate), "MMM d, yyyy")}
+                          </div>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant={
+                          request.status === "approved" ? "default" : 
+                          request.status === "declined" ? "destructive" : 
+                          "outline"
+                        }
+                      >
+                        {request.status === "approved" ? "Approved" : 
+                         request.status === "declined" ? "Declined" : 
+                         "Pending"}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="font-medium">Preferred Date:</span>{" "}
+                        {format(new Date(request.preferredDate), "MMM d, yyyy")}
+                      </div>
+                      <div>
+                        <span className="font-medium">Preferred Time:</span>{" "}
+                        {format(new Date(`2000-01-01T${request.preferredTime}`), "h:mm a")}
+                      </div>
+                      <div className="col-span-2">
+                        <span className="font-medium">Session Type:</span>{" "}
+                        {request.sessionType}
+                      </div>
+                      <div className="col-span-2">
+                        <span className="font-medium">Treatment Method:</span>{" "}
+                        {request.treatmentMethod}
+                      </div>
+                      {request.notes && (
+                        <div className="col-span-2">
+                          <span className="font-medium">Notes:</span>{" "}
+                          {request.notes}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {request.status === "pending" && (
+                      <div className="flex justify-end space-x-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                          onClick={() => handleDeclineRequest(request.id)}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Decline
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="text-green-500 border-green-200 hover:bg-green-50 hover:text-green-600"
+                          onClick={() => handleApproveRequest(request.id)}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Approve
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {request.status === "approved" && (
+                      <div className="flex justify-end pt-2">
+                        <Button onClick={() => router.push(`/dashboard/sessions/new-${request.id}`)}>
+                          Start Session
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </TabsContent>

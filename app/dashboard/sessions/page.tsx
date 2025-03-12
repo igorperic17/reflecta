@@ -280,20 +280,85 @@ export default function SessionsPage() {
   const createNewSession = () => {
     setIsCreatingSession(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      // In a real app, you would make an API call to create the session
-      setIsCreatingSession(false);
-      setShowNewSessionDialog(false);
+    // Implement role-specific session creation logic
+    if (user?.role === "patient") {
+      // Patients can only create AI sessions and they start immediately
+      const newSession = {
+        id: `new-${Date.now()}`,
+        patientId: user.id,
+        patientName: user.name,
+        date: "Today",
+        time: format(new Date(), "h:mm a"),
+        status: "Upcoming",
+        type: newSessionType,
+        notes: "",
+        treatmentMethod: newSessionTreatment,
+        isAISession: true // Always AI for patients
+      };
       
-      // Reset form
-      setNewSessionPatient("");
-      setNewSessionDate("");
-      setNewSessionTime("");
-      setNewSessionType("Follow-up");
-      setNewSessionTreatment("cbt");
-      setNewSessionIsAI(false);
-    }, 1000);
+      // Navigate to the new session immediately
+      setTimeout(() => {
+        setIsCreatingSession(false);
+        setShowNewSessionDialog(false);
+        router.push(`/dashboard/sessions/${newSession.id}`);
+      }, 1000);
+    } else if (user?.role === "therapist") {
+      if (newSessionIsAI) {
+        // Therapists creating AI sessions for patients (these are scheduled)
+        setTimeout(() => {
+          // In a real app, you would make an API call to create the session
+          setIsCreatingSession(false);
+          setShowNewSessionDialog(false);
+          
+          // Reset form
+          setNewSessionPatient("");
+          setNewSessionDate("");
+          setNewSessionTime("");
+          setNewSessionType("Follow-up");
+          setNewSessionTreatment("cbt");
+          setNewSessionIsAI(false);
+          
+          // Show success message
+          alert("AI session scheduled successfully");
+        }, 1000);
+      } else {
+        // Therapists creating human sessions (these are scheduled)
+        setTimeout(() => {
+          // In a real app, you would make an API call to create the session
+          setIsCreatingSession(false);
+          setShowNewSessionDialog(false);
+          
+          // Reset form
+          setNewSessionPatient("");
+          setNewSessionDate("");
+          setNewSessionTime("");
+          setNewSessionType("Follow-up");
+          setNewSessionTreatment("cbt");
+          setNewSessionIsAI(false);
+          
+          // Show success message
+          alert("Human session scheduled successfully");
+        }, 1000);
+      }
+    } else if (user?.role === "admin") {
+      // Admins can create any type of session
+      setTimeout(() => {
+        // In a real app, you would make an API call to create the session
+        setIsCreatingSession(false);
+        setShowNewSessionDialog(false);
+        
+        // Reset form
+        setNewSessionPatient("");
+        setNewSessionDate("");
+        setNewSessionTime("");
+        setNewSessionType("Follow-up");
+        setNewSessionTreatment("cbt");
+        setNewSessionIsAI(false);
+        
+        // Show success message
+        alert(`${newSessionIsAI ? "AI" : "Human"} session created successfully`);
+      }, 1000);
+    }
   };
 
   return (
@@ -690,12 +755,18 @@ export default function SessionsPage() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {user?.role === "patient" ? "Start AI Therapy Session" : "Create New Session"}
+              {user?.role === "patient" 
+                ? "Start AI Therapy Session" 
+                : newSessionIsAI 
+                  ? "Schedule AI Session" 
+                  : "Schedule Human Session"}
             </DialogTitle>
             <DialogDescription>
               {user?.role === "patient" 
                 ? "Start a new AI-assisted therapy session for yourself."
-                : "Schedule a new therapy session with a patient."}
+                : newSessionIsAI
+                  ? "Schedule a new AI-assisted therapy session for a patient."
+                  : "Schedule a new in-person therapy session with a patient."}
             </DialogDescription>
           </DialogHeader>
           
@@ -718,27 +789,30 @@ export default function SessionsPage() {
               </div>
             )}
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input 
-                  id="date" 
-                  type="date" 
-                  value={newSessionDate}
-                  onChange={(e) => setNewSessionDate(e.target.value)}
-                />
+            {/* Date and time fields - only shown for scheduled sessions (not for patient AI sessions) */}
+            {(user?.role !== "patient") && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input 
+                    id="date" 
+                    type="date" 
+                    value={newSessionDate}
+                    onChange={(e) => setNewSessionDate(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  <Input 
+                    id="time" 
+                    type="time" 
+                    value={newSessionTime}
+                    onChange={(e) => setNewSessionTime(e.target.value)}
+                  />
+                </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="time">Time</Label>
-                <Input 
-                  id="time" 
-                  type="time" 
-                  value={newSessionTime}
-                  onChange={(e) => setNewSessionTime(e.target.value)}
-                />
-              </div>
-            </div>
+            )}
             
             <div className="space-y-2">
               <Label htmlFor="sessionType">Session Type</Label>
@@ -783,11 +857,30 @@ export default function SessionsPage() {
               </div>
             )}
             
+            {/* Information messages based on user role */}
             {user?.role === "patient" && (
               <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
                 <p className="text-sm text-blue-800 dark:text-blue-300 flex items-center">
                   <Info className="h-4 w-4 mr-2" />
-                  As a patient, you can start AI therapy sessions directly. For sessions with human therapists, please book through the Therapists page.
+                  As a patient, you can start AI therapy sessions immediately. For sessions with human therapists, please request them through the Therapists page.
+                </p>
+              </div>
+            )}
+            
+            {user?.role === "therapist" && !newSessionIsAI && (
+              <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
+                <p className="text-sm text-blue-800 dark:text-blue-300 flex items-center">
+                  <Info className="h-4 w-4 mr-2" />
+                  Human sessions must be scheduled in advance and can only be started by you at the scheduled time.
+                </p>
+              </div>
+            )}
+            
+            {user?.role === "therapist" && newSessionIsAI && (
+              <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
+                <p className="text-sm text-blue-800 dark:text-blue-300 flex items-center">
+                  <Info className="h-4 w-4 mr-2" />
+                  AI sessions can be scheduled for patients and will be available for them to join at the scheduled time.
                 </p>
               </div>
             )}
@@ -804,18 +897,17 @@ export default function SessionsPage() {
               onClick={createNewSession}
               disabled={
                 (user?.role !== "patient" && !newSessionPatient) || 
-                !newSessionDate || 
-                !newSessionTime || 
+                (user?.role !== "patient" && (!newSessionDate || !newSessionTime)) || 
                 isCreatingSession
               }
             >
               {isCreatingSession ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {user?.role === "patient" ? "Starting..." : "Scheduling..."}
                 </>
               ) : (
-                user?.role === "patient" ? "Start AI Session" : "Create Session"
+                user?.role === "patient" ? "Start AI Session Now" : newSessionIsAI ? "Schedule AI Session" : "Schedule Human Session"
               )}
             </Button>
           </DialogFooter>

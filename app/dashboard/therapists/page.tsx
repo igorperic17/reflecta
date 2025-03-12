@@ -18,7 +18,8 @@ import {
   X,
   Sparkles,
   CheckCircle2,
-  Info
+  Info,
+  Loader2
 } from "lucide-react";
 import { PrimaryButton, OutlineButton, SecondaryButton } from "@/components/dashboard/DashboardButton";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { therapyTypes, getTherapyTypeName } from "@/lib/therapy-types";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar as CalendarIcon } from "@/components/ui/calendar";
+import { toast } from "sonner";
 
 // Define therapist type
 interface Therapist {
@@ -64,6 +69,15 @@ export default function TherapistsPage() {
   const [selectedTime, setSelectedTime] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
+  
+  // Session request state
+  const [showSessionRequestDialog, setShowSessionRequestDialog] = useState(false);
+  const [isRequestingSession, setIsRequestingSession] = useState(false);
+  const [sessionDate, setSessionDate] = useState("");
+  const [sessionTime, setSessionTime] = useState("");
+  const [sessionType, setSessionType] = useState("Follow-up");
+  const [sessionTreatment, setSessionTreatment] = useState("cbt");
+  const [sessionNotes, setSessionNotes] = useState("");
   
   // Sample therapist data
   const therapists: Therapist[] = [
@@ -216,6 +230,33 @@ export default function TherapistsPage() {
     
     // Navigate to the dashboard
     router.push("/dashboard");
+  };
+
+  // Handle session request
+  const handleRequestSession = (therapist: Therapist) => {
+    setSelectedTherapist(therapist);
+    setShowSessionRequestDialog(true);
+  };
+
+  // Submit session request
+  const submitSessionRequest = () => {
+    setIsRequestingSession(true);
+    
+    // Simulate API call to request a session
+    setTimeout(() => {
+      setIsRequestingSession(false);
+      setShowSessionRequestDialog(false);
+      
+      // Reset form
+      setSessionDate("");
+      setSessionTime("");
+      setSessionType("Follow-up");
+      setSessionTreatment("cbt");
+      setSessionNotes("");
+      
+      // Show success message
+      toast.success(`Session requested with ${selectedTherapist?.name}. They will review your request shortly.`);
+    }, 1000);
   };
 
   return (
@@ -391,12 +432,22 @@ export default function TherapistsPage() {
                   </div>
                 </div>
                 
-                <PrimaryButton 
-                  onClick={() => handlePurchaseSessions(therapist)}
-                  className="w-full"
-                >
-                  Book Sessions
-                </PrimaryButton>
+                <div className="flex space-x-2 w-full">
+                  <PrimaryButton 
+                    onClick={() => handlePurchaseSessions(therapist)}
+                    className="flex-1"
+                  >
+                    Book Sessions
+                  </PrimaryButton>
+                  {user?.role === "patient" && (
+                    <SecondaryButton 
+                      onClick={() => handleRequestSession(therapist)}
+                      className="flex-1"
+                    >
+                      Request Session
+                    </SecondaryButton>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -584,6 +635,115 @@ export default function TherapistsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Session Request Dialog */}
+      {selectedTherapist && (
+        <Dialog open={showSessionRequestDialog} onOpenChange={setShowSessionRequestDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Request Session with {selectedTherapist.name}</DialogTitle>
+              <DialogDescription>
+                Fill out the details below to request a human therapy session.
+                Your therapist will review and confirm the appointment.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Preferred Date</Label>
+                  <Input 
+                    id="date" 
+                    type="date" 
+                    value={sessionDate}
+                    onChange={(e) => setSessionDate(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="time">Preferred Time</Label>
+                  <Input 
+                    id="time" 
+                    type="time" 
+                    value={sessionTime}
+                    onChange={(e) => setSessionTime(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="sessionType">Session Type</Label>
+                <Select value={sessionType} onValueChange={setSessionType}>
+                  <SelectTrigger id="sessionType">
+                    <SelectValue placeholder="Select session type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Initial Assessment">Initial Assessment</SelectItem>
+                    <SelectItem value="Follow-up">Follow-up</SelectItem>
+                    <SelectItem value="Crisis Intervention">Crisis Intervention</SelectItem>
+                    <SelectItem value="Group Therapy">Group Therapy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="treatmentMethod">Preferred Treatment Method</Label>
+                <Select value={sessionTreatment} onValueChange={setSessionTreatment}>
+                  <SelectTrigger id="treatmentMethod">
+                    <SelectValue placeholder="Select treatment method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cbt">Cognitive Behavioral Therapy (CBT)</SelectItem>
+                    <SelectItem value="psychodynamic">Psychodynamic Therapy</SelectItem>
+                    <SelectItem value="humanistic">Humanistic Therapy</SelectItem>
+                    <SelectItem value="mindfulness">Mindfulness-Based Therapy</SelectItem>
+                    <SelectItem value="integrative">Integrative Therapy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="notes">Additional Notes (optional)</Label>
+                <Input 
+                  id="notes" 
+                  placeholder="Any specific concerns or topics you'd like to discuss"
+                  value={sessionNotes}
+                  onChange={(e) => setSessionNotes(e.target.value)}
+                />
+              </div>
+              
+              <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
+                <p className="text-sm text-blue-800 dark:text-blue-300 flex items-center">
+                  <Info className="h-4 w-4 mr-2" />
+                  Human sessions must be requested and approved by therapists. You'll receive a notification once your request is reviewed.
+                </p>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSessionRequestDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={submitSessionRequest}
+                disabled={!sessionDate || !sessionTime || isRequestingSession}
+              >
+                {isRequestingSession ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Requesting...
+                  </>
+                ) : (
+                  "Request Session"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
