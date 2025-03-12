@@ -21,7 +21,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
-  Loader2
+  Loader2,
+  Info,
+  List
 } from "lucide-react";
 import { PrimaryButton, OutlineButton, SecondaryButton } from "@/components/dashboard/DashboardButton";
 import { Input } from "@/components/ui/input";
@@ -39,6 +41,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, parseISO, isToday, isTomorrow, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
 import { getTherapyTypeName } from "@/lib/therapy-types";
 import { Session } from "@/lib/types";
+import { UserAvatar } from "@/components/dashboard/UserAvatar";
+import { CheckCircle2 } from "lucide-react";
 
 export default function SessionsPage() {
   const router = useRouter();
@@ -54,6 +58,7 @@ export default function SessionsPage() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [datePickerMonth, setDatePickerMonth] = useState<Date>(new Date());
+  const [showFilters, setShowFilters] = useState(false);
   
   // Create new session dialog
   const [showNewSessionDialog, setShowNewSessionDialog] = useState(false);
@@ -194,11 +199,11 @@ export default function SessionsPage() {
         <CardContent className="p-0">
           <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border-2 border-blue-200 dark:border-blue-800">
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
-                  {session.patientName.split(" ").map((n) => n[0]).join("")}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar 
+                name={session.patientName} 
+                role="user" 
+                size="xs"
+              />
               <div>
                 <h3 className="font-medium text-slate-900 dark:text-white">{session.patientName}</h3>
                 <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
@@ -296,29 +301,54 @@ export default function SessionsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="inline-flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full text-blue-600 dark:text-blue-400 text-sm font-medium mb-2">
-            <Activity className="w-4 h-4" />
-            <span>Session Management</span>
+            <CalendarIcon className="w-4 h-4" />
+            <span>Therapy Sessions</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
-            Sessions
+            Your Sessions
           </h1>
           <p className="text-slate-600 dark:text-slate-300 mt-1">
-            {user?.role === "patient" 
-              ? "View and manage your therapy sessions" 
-              : "Schedule and manage therapy sessions with your patients"}
+            {user?.role === "therapist" 
+              ? "Manage your upcoming and past therapy sessions with patients" 
+              : "View and manage your therapy sessions"}
           </p>
         </div>
-        <div className="flex gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 dark:text-slate-400" />
-            <Input placeholder="Search sessions..." className="pl-9 border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400" />
+        
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <div className="flex gap-2">
+            <OutlineButton 
+              icon={viewMode === "list" ? List : CalendarIcon} 
+              onClick={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
+            >
+              {viewMode === "list" ? "Calendar View" : "List View"}
+            </OutlineButton>
+            
+            <Popover open={showFilters} onOpenChange={setShowFilters}>
+              <PopoverTrigger asChild>
+                <OutlineButton>
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                </OutlineButton>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                {/* Filter content */}
+              </PopoverContent>
+            </Popover>
           </div>
-          {user?.role === "therapist" && (
+          
+          {/* Only show Create Session button for therapists or admins, or for patients with AI sessions only */}
+          {(user?.role === "therapist" || user?.role === "admin" || user?.role === "patient") && (
             <PrimaryButton 
               icon={Plus} 
-              onClick={() => setShowNewSessionDialog(true)}
+              onClick={() => {
+                // For patients, pre-set to AI session
+                if (user?.role === "patient") {
+                  setNewSessionIsAI(true);
+                }
+                setShowNewSessionDialog(true);
+              }}
             >
-              New Session
+              {user?.role === "patient" ? "Start AI Session" : "Create Session"}
             </PrimaryButton>
           )}
         </div>
@@ -659,27 +689,34 @@ export default function SessionsPage() {
       <Dialog open={showNewSessionDialog} onOpenChange={setShowNewSessionDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create New Session</DialogTitle>
+            <DialogTitle>
+              {user?.role === "patient" ? "Start AI Therapy Session" : "Create New Session"}
+            </DialogTitle>
             <DialogDescription>
-              Schedule a new therapy session with a patient.
+              {user?.role === "patient" 
+                ? "Start a new AI-assisted therapy session for yourself."
+                : "Schedule a new therapy session with a patient."}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="patient">Patient</Label>
-              <Select value={newSessionPatient} onValueChange={setNewSessionPatient}>
-                <SelectTrigger id="patient">
-                  <SelectValue placeholder="Select a patient" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="p1">Alex Johnson</SelectItem>
-                  <SelectItem value="p2">Sam Taylor</SelectItem>
-                  <SelectItem value="p3">Jamie Smith</SelectItem>
-                  <SelectItem value="p4">Riley Wilson</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Only show patient selection for therapists and admins */}
+            {user?.role !== "patient" && (
+              <div className="space-y-2">
+                <Label htmlFor="patient">Patient</Label>
+                <Select value={newSessionPatient} onValueChange={setNewSessionPatient}>
+                  <SelectTrigger id="patient">
+                    <SelectValue placeholder="Select a patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="p1">Alex Johnson</SelectItem>
+                    <SelectItem value="p2">Sam Taylor</SelectItem>
+                    <SelectItem value="p3">Jamie Smith</SelectItem>
+                    <SelectItem value="p4">Riley Wilson</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -704,41 +741,56 @@ export default function SessionsPage() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="type">Session Type</Label>
+              <Label htmlFor="sessionType">Session Type</Label>
               <Select value={newSessionType} onValueChange={setNewSessionType}>
-                <SelectTrigger id="type">
+                <SelectTrigger id="sessionType">
                   <SelectValue placeholder="Select session type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Initial Assessment">Initial Assessment</SelectItem>
                   <SelectItem value="Follow-up">Follow-up</SelectItem>
                   <SelectItem value="Crisis Intervention">Crisis Intervention</SelectItem>
+                  <SelectItem value="Group Therapy">Group Therapy</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="treatment">Treatment Method</Label>
+              <Label htmlFor="treatmentMethod">Treatment Method</Label>
               <Select value={newSessionTreatment} onValueChange={setNewSessionTreatment}>
-                <SelectTrigger id="treatment">
+                <SelectTrigger id="treatmentMethod">
                   <SelectValue placeholder="Select treatment method" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cbt">Cognitive Behavioral Therapy (CBT)</SelectItem>
                   <SelectItem value="psychodynamic">Psychodynamic Therapy</SelectItem>
                   <SelectItem value="humanistic">Humanistic Therapy</SelectItem>
+                  <SelectItem value="mindfulness">Mindfulness-Based Therapy</SelectItem>
+                  <SelectItem value="integrative">Integrative Therapy</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="ai-session" 
-                checked={newSessionIsAI} 
-                onCheckedChange={setNewSessionIsAI}
-              />
-              <Label htmlFor="ai-session">AI-Assisted Session</Label>
-            </div>
+            {/* Only show AI session toggle for therapists and admins, for patients it's always AI */}
+            {user?.role !== "patient" && (
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="aiSession" 
+                  checked={newSessionIsAI}
+                  onCheckedChange={setNewSessionIsAI}
+                />
+                <Label htmlFor="aiSession">AI-assisted session</Label>
+              </div>
+            )}
+            
+            {user?.role === "patient" && (
+              <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
+                <p className="text-sm text-blue-800 dark:text-blue-300 flex items-center">
+                  <Info className="h-4 w-4 mr-2" />
+                  As a patient, you can start AI therapy sessions directly. For sessions with human therapists, please book through the Therapists page.
+                </p>
+              </div>
+            )}
           </div>
           
           <DialogFooter>
@@ -750,7 +802,12 @@ export default function SessionsPage() {
             </Button>
             <Button 
               onClick={createNewSession}
-              disabled={!newSessionPatient || !newSessionDate || !newSessionTime || isCreatingSession}
+              disabled={
+                (user?.role !== "patient" && !newSessionPatient) || 
+                !newSessionDate || 
+                !newSessionTime || 
+                isCreatingSession
+              }
             >
               {isCreatingSession ? (
                 <>
@@ -758,7 +815,7 @@ export default function SessionsPage() {
                   Creating...
                 </>
               ) : (
-                "Create Session"
+                user?.role === "patient" ? "Start AI Session" : "Create Session"
               )}
             </Button>
           </DialogFooter>

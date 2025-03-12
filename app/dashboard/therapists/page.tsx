@@ -17,7 +17,8 @@ import {
   ChevronDown,
   X,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Info
 } from "lucide-react";
 import { PrimaryButton, OutlineButton, SecondaryButton } from "@/components/dashboard/DashboardButton";
 import { Input } from "@/components/ui/input";
@@ -180,9 +181,19 @@ export default function TherapistsPage() {
   };
 
   const handlePurchaseSessions = (therapist: Therapist) => {
-    setSelectedTherapist(therapist);
-    setShowPurchaseDialog(true);
-    setPaymentComplete(false);
+    // Ensure patients can only book sessions for themselves
+    if (user?.role === 'patient') {
+      // For patients, we'll allow them to book both AI and human therapists
+      // but we'll make it clear they're booking for themselves
+      setSelectedTherapist(therapist);
+      setShowPurchaseDialog(true);
+      setPaymentComplete(false);
+    } else {
+      // For therapists and admins, proceed as normal
+      setSelectedTherapist(therapist);
+      setShowPurchaseDialog(true);
+      setPaymentComplete(false);
+    }
   };
 
   const processPayment = async () => {
@@ -415,7 +426,9 @@ export default function TherapistsPage() {
             <DialogDescription>
               {paymentComplete 
                 ? "Your sessions have been booked successfully." 
-                : `Book therapy sessions with ${selectedTherapist?.name}`
+                : user?.role === 'patient'
+                  ? `Book therapy sessions with ${selectedTherapist?.name} for yourself.`
+                  : `Book therapy sessions with ${selectedTherapist?.name}`
               }
             </DialogDescription>
           </DialogHeader>
@@ -442,6 +455,15 @@ export default function TherapistsPage() {
                   <div className="text-xs text-slate-500 dark:text-slate-400">per session</div>
                 </div>
               </div>
+              
+              {user?.role === 'patient' && (
+                <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
+                  <p className="text-sm text-blue-800 dark:text-blue-300 flex items-center">
+                    <Info className="h-4 w-4 mr-2" />
+                    As a patient, you're booking these sessions for your own therapy.
+                  </p>
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="sessionCount">Number of Sessions</Label>
