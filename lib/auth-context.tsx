@@ -11,6 +11,7 @@ export interface User {
   role: UserRole;
   specialties?: string[];
   profileCompleted?: boolean;
+  onboardingCompleted?: boolean;
 };
 
 export interface AuthContextType {
