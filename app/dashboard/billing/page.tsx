@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
 import { 
@@ -9,14 +10,32 @@ import {
   DollarSign,
   Calendar,
   Plus,
-  FileText
+  FileText,
+  Users,
+  Clock,
+  Filter
 } from "lucide-react";
 import { PrimaryButton, OutlineButton } from "@/components/dashboard/DashboardButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { UserAvatar } from "@/components/dashboard/UserAvatar";
+
+// Define session purchase type
+interface SessionPurchase {
+  id: string;
+  patientName: string;
+  date: string;
+  sessionCount: number;
+  totalAmount: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  nextSession?: string;
+}
 
 export default function BillingPage() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>("all");
   
   // Sample billing data
   const invoices = [
@@ -43,6 +62,59 @@ export default function BillingPage() {
     }
   ];
 
+  // Sample purchased sessions data for therapists
+  const purchasedSessions: SessionPurchase[] = [
+    {
+      id: "PS-001",
+      patientName: "Alex Johnson",
+      date: "Mar 15, 2024",
+      sessionCount: 5,
+      totalAmount: "$600.00",
+      status: 'upcoming',
+      nextSession: "Mar 22, 2024 at 10:00 AM"
+    },
+    {
+      id: "PS-002",
+      patientName: "Sam Taylor",
+      date: "Mar 10, 2024",
+      sessionCount: 3,
+      totalAmount: "$360.00",
+      status: 'upcoming',
+      nextSession: "Mar 24, 2024 at 2:30 PM"
+    },
+    {
+      id: "PS-003",
+      patientName: "Jamie Smith",
+      date: "Feb 28, 2024",
+      sessionCount: 10,
+      totalAmount: "$1,020.00",
+      status: 'upcoming',
+      nextSession: "Mar 21, 2024 at 11:15 AM"
+    },
+    {
+      id: "PS-004",
+      patientName: "Riley Wilson",
+      date: "Feb 15, 2024",
+      sessionCount: 1,
+      totalAmount: "$120.00",
+      status: 'completed'
+    },
+    {
+      id: "PS-005",
+      patientName: "Morgan Lee",
+      date: "Jan 20, 2024",
+      sessionCount: 5,
+      totalAmount: "$600.00",
+      status: 'completed'
+    }
+  ];
+
+  // Filter purchased sessions based on tab
+  const filteredSessions = purchasedSessions.filter(session => {
+    if (activeTab === "all") return true;
+    return session.status === activeTab;
+  });
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -64,6 +136,105 @@ export default function BillingPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
+          {user?.role === "therapist" && (
+            <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm mb-6">
+              <CardHeader>
+                <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
+                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  Patient Sessions
+                </CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  Sessions purchased by your patients
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="bg-slate-100 dark:bg-slate-800 p-1 w-full mb-4">
+                    <TabsTrigger value="all" className="flex-1 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
+                      All Sessions
+                    </TabsTrigger>
+                    <TabsTrigger value="upcoming" className="flex-1 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
+                      Upcoming
+                    </TabsTrigger>
+                    <TabsTrigger value="completed" className="flex-1 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
+                      Completed
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value={activeTab} className="m-0">
+                    <div className="space-y-4">
+                      {filteredSessions.length > 0 ? (
+                        filteredSessions.map((session) => (
+                          <div 
+                            key={session.id}
+                            className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200 gap-4"
+                          >
+                            <div className="flex items-center gap-4">
+                              <UserAvatar 
+                                name={session.patientName} 
+                                role="user"
+                                size="md"
+                              />
+                              <div>
+                                <h3 className="text-sm font-medium text-slate-900 dark:text-white">
+                                  {session.patientName}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    Purchased: {session.date}
+                                  </p>
+                                  <Badge className={`text-xs ${
+                                    session.status === 'upcoming' 
+                                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' 
+                                      : session.status === 'completed'
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                  }`}>
+                                    {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                                  </Badge>
+                                </div>
+                                {session.nextSession && (
+                                  <p className="text-xs flex items-center gap-1 text-blue-600 dark:text-blue-400 mt-1">
+                                    <Clock className="h-3 w-3" />
+                                    Next: {session.nextSession}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between md:justify-end gap-4 mt-3 md:mt-0">
+                              <div className="text-right">
+                                <div className="flex items-center gap-2">
+                                  <Badge className="bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300">
+                                    {session.sessionCount} {session.sessionCount === 1 ? 'Session' : 'Sessions'}
+                                  </Badge>
+                                  <p className="text-sm font-medium text-slate-900 dark:text-white">{session.totalAmount}</p>
+                                </div>
+                              </div>
+                              <OutlineButton size="sm">
+                                View Details
+                              </OutlineButton>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                          <Users className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
+                          <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">No sessions found</h3>
+                          <p className="text-slate-500 dark:text-slate-400 max-w-md">
+                            {activeTab === "all" 
+                              ? "You don't have any purchased sessions at the moment." 
+                              : `You don't have any ${activeTab} sessions.`
+                            }
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm">
             <CardHeader>
               <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
@@ -238,6 +409,41 @@ export default function BillingPage() {
                     </div>
                     <OutlineButton className="w-full">
                       Update Billing Info
+                    </OutlineButton>
+                  </div>
+                </div>
+              )}
+              
+              {user?.role === "therapist" && (
+                <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-4">Payout Information</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="bank" className="text-slate-700 dark:text-slate-300">Bank Account</Label>
+                      <Input 
+                        id="bank" 
+                        defaultValue="•••• •••• •••• 1234" 
+                        disabled
+                        className="border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="routing" className="text-slate-700 dark:text-slate-300">Routing Number</Label>
+                      <Input 
+                        id="routing" 
+                        defaultValue="••••••••" 
+                        disabled
+                        className="border-slate-200 dark:border-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="schedule" className="text-slate-700 dark:text-slate-300">Payout Schedule</Label>
+                      <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-700 dark:text-slate-300">
+                        Weekly (Every Monday)
+                      </div>
+                    </div>
+                    <OutlineButton className="w-full">
+                      Update Payout Info
                     </OutlineButton>
                   </div>
                 </div>
